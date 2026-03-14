@@ -101,7 +101,7 @@ UPLOAD_BATCH_SIZE = 16    # must equal EMBED_BATCH_SIZE so vectors are freed imm
 # Abbruch/Neustart: auf 1 setzen um von Anfang an zu verarbeiten.
 # Bei Unterbrechung diese Zahl auf die zuletzt angezeigte Dateinummer setzen,
 # um den Prozess ab dieser Stelle fortzusetzen (1-basierter Index).
-RESUME_FROM_FILE = 1386
+RESUME_FROM_FILE = 1
 
 # Markdown heading levels used for structural pre-splitting
 HEADERS_TO_SPLIT = [("#", "h1"), ("##", "h2"), ("###", "h3")]

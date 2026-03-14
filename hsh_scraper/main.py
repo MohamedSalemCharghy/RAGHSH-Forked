@@ -87,6 +87,11 @@ MAX_PAGES = 10000
 ALLOWED_DOMAIN = "hs-hannover.de"
 MAX_AGE_DAYS = 7  # Re-crawl pages older than this many days
 
+# Subdomains die beim Crawlen komplett ignoriert werden sollen
+BLOCKED_DOMAINS = {
+    "serwiss.bib.hs-hannover.de",
+}
+
 OUTPUT_DIR = Path(__file__).parent / "data" / "ingested"
 RATE_LIMIT_SECONDS = 2
 
@@ -147,8 +152,11 @@ def normalize_url(url: str) -> str:
 
 
 def is_same_domain(url: str) -> bool:
-    """Return True only if *url* belongs to hs-hannover.de or a subdomain."""
+    """Return True only if *url* belongs to hs-hannover.de or a subdomain,
+    and is not in the BLOCKED_DOMAINS list."""
     netloc = urlparse(url).netloc.lower()
+    if netloc in BLOCKED_DOMAINS:
+        return False
     return netloc == ALLOWED_DOMAIN or netloc.endswith("." + ALLOWED_DOMAIN)
 
 

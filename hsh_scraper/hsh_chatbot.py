@@ -88,7 +88,7 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastembed import TextEmbedding
+from fastembed import SparseTextEmbedding, TextEmbedding
 from openai import OpenAI, APIConnectionError, AuthenticationError
 from qdrant_client import QdrantClient
 
@@ -107,6 +107,7 @@ GWDG_API_BASE = os.getenv("GWDG_API_BASE", "https://chat-ai.academiccloud.de/v1"
 
 QDRANT_URL      = "http://localhost:6333"
 EMBED_MODEL     = "jinaai/jina-embeddings-v3"
+SPARSE_MODEL    = "Qdrant/bm25"
 RAG_TOP_K       = 4      # Treffer für den Kontext
 TEMPERATURE     = 0.0    # Maximale Faktenreue
 DEBUG_PROMPT    = True   # Zeigt den vollständigen LLM-Prompt vor jeder Anfrage
@@ -292,6 +293,7 @@ def chat_loop(
     model: str,
     qdrant_client: QdrantClient,
     embedder: TextEmbedding,
+    sparse_embedder: SparseTextEmbedding,
 ) -> None:
     """Interaktive RAG-Chat-Schleife."""
     print(f"HsH-Chatbot bereit.  Strg+C oder 'exit' zum Beenden.\n")
@@ -312,7 +314,7 @@ def chat_loop(
 
         # ── RAG: Suche + Kontext ──────────────────────────────────────────
         results = perform_hybrid_search(
-            qdrant_client, embedder, question, top_k=RAG_TOP_K
+            qdrant_client, embedder, sparse_embedder, question, top_k=RAG_TOP_K
         )
 
         if not results:
@@ -365,10 +367,13 @@ def main() -> None:
     # ── Embedding-Modell laden ────────────────────────────────────────────
     print(f"Lade Embedding-Modell '{EMBED_MODEL}'…")
     embedder = TextEmbedding(model_name=EMBED_MODEL)
-    print("Embedding-Modell geladen.\n")
+
+    print(f"Lade Sparse-Modell '{SPARSE_MODEL}'…")
+    sparse_embedder = SparseTextEmbedding(model_name=SPARSE_MODEL)
+    print("Modelle geladen.\n")
 
     # ── Chat starten ──────────────────────────────────────────────────────
-    chat_loop(gwdg_client, model, qdrant_client, embedder)
+    chat_loop(gwdg_client, model, qdrant_client, embedder, sparse_embedder)
 
 
 if __name__ == "__main__":
