@@ -23,9 +23,18 @@ BLOCKED_DOMAINS = {
 
 DECISION_DB_PATH = Path(__file__).parent / "data" / "url_decisions.db"
 
-ENGLISH_SECTION_HOST = "www.hs-hannover.de"
 ENGLISH_SECTION_PREFIX = "/en"
 PROCESSED_ASSET_MARKER = "/fileadmin/_processed_/"
+BLOCKED_APP_HOSTS = {
+    "moodle.hs-hannover.de",
+}
+BLOCKED_AUTH_PATH_MARKERS = (
+    "/login",
+    "/logout",
+    "/shibboleth",
+    "/saml",
+    "/oauth",
+)
 
 MEDIA_EXTENSIONS = {
     ".jpg",
@@ -170,9 +179,11 @@ def evaluate_rag_url(url: str) -> UrlDecision:
     if not is_same_domain(normalized):
         return UrlDecision(url, normalized, "block", "blockiert_externe_domain")
 
-    if host == ENGLISH_SECTION_HOST and (
-        path_lower == ENGLISH_SECTION_PREFIX
-        or path_lower.startswith(ENGLISH_SECTION_PREFIX + "/")
+    if host in BLOCKED_APP_HOSTS:
+        return UrlDecision(url, normalized, "block", "blockiert_nicht_oeffentliche_app")
+
+    if path_lower == ENGLISH_SECTION_PREFIX or path_lower.startswith(
+        ENGLISH_SECTION_PREFIX + "/"
     ):
         return UrlDecision(
             url,
@@ -180,6 +191,9 @@ def evaluate_rag_url(url: str) -> UrlDecision:
             "block",
             "blockiert_englischen_en_bereich",
         )
+
+    if any(marker in path_lower for marker in BLOCKED_AUTH_PATH_MARKERS):
+        return UrlDecision(url, normalized, "block", "blockiert_auth_pfad")
 
     if PROCESSED_ASSET_MARKER in path_lower:
         return UrlDecision(url, normalized, "block", "blockiert_processed_asset")
@@ -196,7 +210,12 @@ def evaluate_rag_url(url: str) -> UrlDecision:
         return UrlDecision(url, normalized, "allow", "erlaubt_oeffentliches_pdf")
 
     if suffix in OFFICE_EXTENSIONS:
-        return UrlDecision(url, normalized, "allow", "erlaubt_office_dokument")
+        return UrlDecision(
+            url,
+            normalized,
+            "block",
+            "blockiert_office_dokument_ohne_ingest_support",
+        )
 
     if suffix in HTML_LIKE_EXTENSIONS:
         return UrlDecision(url, normalized, "allow", "erlaubt_oeffentliche_html_seite")
