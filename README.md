@@ -118,6 +118,7 @@ RAGHSH/
 └── hsh_scraper/
     ├── main.py                      # Phase 1: Web-Spider (BFS-Crawler)
     ├── resume_crawler.py            # Phase 1b: Spider fortsetzen / Lücken schließen
+    ├── url_filter.py                # Gemeinsame RAG-URL-Filterung + SQLite-Ablage
     ├── hpc_vectorizer.py            # Phase 2a: HPC-Vektorisierung (Dense + BM25 → Parquet)
     ├── enrich_sparse.py             # Phase 2b: BM25-Spalten lokal hinzufügen (Fallback)
     ├── local_importer.py            # Phase 3: Parquet → Qdrant
@@ -133,6 +134,7 @@ RAGHSH/
     ├── hsh_vectors.parquet          # HPC-Ausgabe (Dense + Sparse Vektoren)
     ├── hsh_vectors_enriched.parquet # Optional: lokal angereicherte Parquet-Datei
     └── data/
+        ├── url_decisions.db         # SQLite-Historie der URL-Entscheidungen
         └── ingested/                # Gescrapte Seiten als Markdown-Dateien
             ├── YYYY-MM-DD_slug.md
             └── ...
@@ -229,7 +231,15 @@ python main.py
 
 Crawlt `www.hs-hannover.de` per Breadth-First-Search (BFS). Jede Seite wird als Markdown-Datei mit YAML-Header gespeichert. Bereits frisch gecachte Seiten (< `MAX_AGE_DAYS` Tage) werden übersprungen.
 
-**Geblockte Subdomains** (nicht gecrawlt): `serwiss.bib.hs-hannover.de`
+Zusätzlich bewertet ein gemeinsamer RAG-Filter jede neu entdeckte URL, bevor sie in die Queue gelangt. Geblockt werden aktuell u.a.:
+
+- der englische Bereich unter `https://www.hs-hannover.de/en`
+- Medien-Dateien wie Bilder, Audio und Video
+- technische Assets wie CSS/JS/Archive
+- `fileadmin/_processed_`-Assets
+- bekannte Backend-/Interndomains wie `serwiss.bib.hs-hannover.de` und `typo3backend-live.hs-hannover.de`
+
+Jede Entscheidung wird in `data/url_decisions.db` gespeichert.
 
 ```
 2026-03-14 [INFO] Crawling: https://www.hs-hannover.de/
@@ -246,6 +256,10 @@ python resume_crawler.py --dry-run  # nur Analyse, kein Crawlen
 ```
 
 `resume_crawler.py` liest alle vorhandenen Markdown-Dateien, extrahiert darin enthaltene Links und crawlt nur Seiten, die fehlen oder veraltet sind. Ideal für inkrementelle Aktualisierungen.
+
+Der gleiche RAG-Filter wird auch im Resume-Pfad verwendet. `--dry-run` zeigt dadurch nicht nur die Crawl-Kategorien (frisch / veraltet / fehlend), sondern auch eine Zusammenfassung der Filterentscheidungen inklusive Gruenden und Beispiel-URLs.
+
+Die SQLite-Datei `data/url_decisions.db` wird bei Bedarf automatisch angelegt und fortlaufend aktualisiert.
 
 ### (Optional) Qualität prüfen
 
@@ -378,13 +392,14 @@ Crawlt die gesamte HsH-Website per **Breadth-First-Search (BFS)**.
 | `SEED_URLS` | `["https://www.hs-hannover.de/"]` | Startseiten |
 | `MAX_PAGES` | `10.000` | Maximale Seitenanzahl |
 | `ALLOWED_DOMAIN` | `hs-hannover.de` | Nur diese Domain und ihre Subdomains |
-| `BLOCKED_DOMAINS` | `{"serwiss.bib.hs-hannover.de"}` | Geblockte Subdomains |
+| `BLOCKED_DOMAINS` | `{"serwiss.bib.hs-hannover.de", "typo3backend-live.hs-hannover.de"}` | Geblockte Subdomains |
 | `MAX_AGE_DAYS` | `7` | Cache-Alter in Tagen |
 | `RATE_LIMIT_SECONDS` | `2` | Pause zwischen Requests |
 
 - **HTML**: Crawl4AI (Playwright) mit CSS-Selektor `main, .content-main, #content, .frame-default`; boilerplate (Navigation, Header, Footer, Cookie-Banner) wird ausgeblendet
 - **PDF**: httpx-Download + pymupdf4llm-Konvertierung
 - **Dateiformat**: `YYYY-MM-DD_url-slug.md` mit YAML-Frontmatter (`source_url`, `title`, `crawl_date`, `content_type`)
+- **RAG-Filter**: Neue Links werden vor dem Queueing durch `url_filter.py` bewertet und in `data/url_decisions.db` protokolliert
 
 ---
 
@@ -398,6 +413,23 @@ Analysiert den Bestand der Markdown-Dateien und crawlt ergänzend:
 | `BLOCKED_DOMAINS` | identisch mit `main.py` | Geblockte Subdomains |
 
 Kategorisiert URLs in: frisch gecacht / veraltet / nur als Link bekannt, nicht gecrawlt.
+
+Zusätzlich:
+
+- bewertet `resume_crawler.py` alle gespeicherten `source_url`-Einträge und alle im Markdown gefundenen Links mit demselben RAG-Filter
+- speichert die Entscheidungen in `data/url_decisions.db`
+- zeigt bei `--dry-run` eine Filter-Zusammenfassung nach Gruenden
+
+---
+
+### `url_filter.py` — Gemeinsame URL-Policy
+
+Zentrale Bewertungslogik fuer `main.py` und `resume_crawler.py`.
+
+- normalisiert URLs
+- blockiert klar unnuetze RAG-Ziele wie `/en`, Medien-Dateien, technische Assets, `_processed_`-Dateien und bekannte Backend-Domains
+- erlaubt standardmaessig oeffentliche HTML-Seiten, PDFs und Office-Dokumente
+- speichert jede Entscheidung in einer kleinen SQLite-Datenbank (`data/url_decisions.db`)
 
 ---
 
@@ -660,8 +692,10 @@ Analysiert alle Markdown-Dateien auf Qualitätsprobleme:
 | `main.py` | `MAX_PAGES` | 10.000 | Max. gecrawlte Seiten |
 | `main.py` | `MAX_AGE_DAYS` | 7 | Cache-TTL in Tagen |
 | `main.py` | `RATE_LIMIT_SECONDS` | 2 | Pause zwischen Requests |
-| `main.py` | `BLOCKED_DOMAINS` | `{serwiss.bib...}` | Geblockte Subdomains |
+| `main.py` | `BLOCKED_DOMAINS` | `{serwiss.bib..., typo3backend-live...}` | Geblockte Subdomains |
 | `resume_crawler.py` | `MAX_PAGES` | 40.000 | Erhöhtes Limit |
+| `url_filter.py` | `BLOCKED_DOMAINS` | `{serwiss.bib..., typo3backend-live...}` | Geblockte/technische Subdomains |
+| `url_filter.py` | `DECISION_DB_PATH` | `data/url_decisions.db` | SQLite-Datei fuer URL-Entscheidungen |
 | `hpc_vectorizer.py` | `CHUNK_SIZE` | 1.000 | Max. Chunk-Zeichen |
 | `hpc_vectorizer.py` | `CHUNK_OVERLAP` | 200 | Überlappung |
 | `hpc_vectorizer.py` | `DENSE_BATCH_SIZE` | 64 | GPU-Batch |
@@ -800,4 +834,3 @@ Deutsche INhalte sind aktueller und für die Suche relevanter.
 
 **Nicht nur Chunks übergeben sondern komplette Datei**
 Hintergrund: Manche Dinge sind nicht zu verstehen ohne die Legende zu kennen. Wie z.B. was bedeutet [K90]? Alternativ: Solche INformationen extrahieren und stets mit übergeben. 
-

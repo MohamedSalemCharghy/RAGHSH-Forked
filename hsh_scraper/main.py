@@ -77,6 +77,15 @@ import openpyxl
 import pymupdf4llm
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig
 from slugify import slugify
+from url_filter import (
+    ALLOWED_DOMAIN,
+    BLOCKED_DOMAINS,
+    DecisionStats,
+    UrlDecisionStore,
+    evaluate_rag_url,
+    format_decision_summary,
+    normalize_url,
+)
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -84,13 +93,7 @@ from slugify import slugify
 
 SEED_URLS = ["https://www.hs-hannover.de/"]
 MAX_PAGES = 10000
-ALLOWED_DOMAIN = "hs-hannover.de"
 MAX_AGE_DAYS = 7  # Re-crawl pages older than this many days
-
-# Subdomains die beim Crawlen komplett ignoriert werden sollen
-BLOCKED_DOMAINS = {
-    "serwiss.bib.hs-hannover.de",
-}
 
 OUTPUT_DIR = Path(__file__).parent / "data" / "ingested"
 RATE_LIMIT_SECONDS = 2
@@ -140,24 +143,6 @@ def save_markdown(filepath: Path, header: str, body: str) -> None:
     filepath.parent.mkdir(parents=True, exist_ok=True)
     filepath.write_text(header + "\n" + body, encoding="utf-8")
     logger.info("Saved %s", filepath)
-
-
-def normalize_url(url: str) -> str:
-    """Strip fragment, query params, and normalize trailing slash."""
-    parsed = urlparse(url)
-    path = parsed.path
-    if path != "/" and path.endswith("/"):
-        path = path.rstrip("/")
-    return parsed._replace(path=path, query="", fragment="", params="").geturl()
-
-
-def is_same_domain(url: str) -> bool:
-    """Return True only if *url* belongs to hs-hannover.de or a subdomain,
-    and is not in the BLOCKED_DOMAINS list."""
-    netloc = urlparse(url).netloc.lower()
-    if netloc in BLOCKED_DOMAINS:
-        return False
-    return netloc == ALLOWED_DOMAIN or netloc.endswith("." + ALLOWED_DOMAIN)
 
 
 def is_fresh(url: str) -> bool:
@@ -355,58 +340,76 @@ async def main() -> None:
     # BFS state
     visited: set[str] = set()
     queue: deque[str] = deque()
+    filter_stats = DecisionStats()
 
-    for seed in SEED_URLS:
-        norm = normalize_url(seed)
-        if norm not in visited:
-            visited.add(norm)
-            queue.append(norm)
-            referrers[norm] = "(seed)"
+    with UrlDecisionStore() as decision_store:
+        for seed in SEED_URLS:
+            decision = evaluate_rag_url(seed)
+            filter_stats.add(decision)
+            decision_store.record(decision, source="main")
+            if not decision.is_allowed:
+                logger.warning(
+                    "Seed-URL durch den RAG-Filter blockiert (%s): %s",
+                    decision.reason,
+                    decision.normalized_url,
+                )
+                continue
+            if decision.normalized_url not in visited:
+                visited.add(decision.normalized_url)
+                queue.append(decision.normalized_url)
+                referrers[decision.normalized_url] = "(seed)"
 
-    pages_processed = 0
+        pages_processed = 0
 
-    async with AsyncWebCrawler() as crawler:
-        while queue and pages_processed < MAX_PAGES:
-            url = queue.popleft()
-            pages_processed += 1
+        async with AsyncWebCrawler() as crawler:
+            while queue and pages_processed < MAX_PAGES:
+                url = queue.popleft()
+                pages_processed += 1
 
-            try:
-                fresh = is_fresh(url)
-                if fresh:
-                    skip_count += 1
-                if await is_pdf_url(url):
-                    if not fresh:
-                        await process_pdf(url, today)
-                        success_count += 1
-                else:
-                    result = await process_html(crawler, url, today, config, save=not fresh)
-                    if not fresh:
-                        success_count += 1
-                    # Extract internal links and enqueue new ones
-                    links_data = getattr(result, "links", {}) or {}
-                    for link_dict in links_data.get("internal", []):
-                        href = link_dict.get("href", "")
-                        if not href or not href.startswith("http"):
-                            continue
-                        norm_href = normalize_url(href)
-                        if norm_href not in visited and is_same_domain(norm_href):
-                            visited.add(norm_href)
-                            queue.append(norm_href)
-                            referrers[norm_href] = url
-            except Exception as exc:
-                logger.error("Error processing %s: %s", url, exc)
-                fail_count += 1
-                errors.append({
-                    "url": url,
-                    "referrer": referrers.get(url, "(unknown)"),
-                    "error": str(exc),
-                })
+                try:
+                    fresh = is_fresh(url)
+                    if fresh:
+                        skip_count += 1
+                    if await is_pdf_url(url):
+                        if not fresh:
+                            await process_pdf(url, today)
+                            success_count += 1
+                    else:
+                        result = await process_html(crawler, url, today, config, save=not fresh)
+                        if not fresh:
+                            success_count += 1
+                        # Neue Links werden vor dem Einreihen zentral bewertet.
+                        links_data = getattr(result, "links", {}) or {}
+                        for link_dict in links_data.get("internal", []):
+                            href = link_dict.get("href", "")
+                            if not href or not href.startswith("http"):
+                                continue
+                            decision = evaluate_rag_url(href)
+                            filter_stats.add(decision)
+                            decision_store.record(decision, source="main")
+                            if not decision.is_allowed:
+                                continue
+                            if decision.normalized_url not in visited:
+                                visited.add(decision.normalized_url)
+                                queue.append(decision.normalized_url)
+                                referrers[decision.normalized_url] = url
+                except Exception as exc:
+                    logger.error("Error processing %s: %s", url, exc)
+                    fail_count += 1
+                    errors.append({
+                        "url": url,
+                        "referrer": referrers.get(url, "(unknown)"),
+                        "error": str(exc),
+                    })
 
-            # Rate-limit between requests (skip after the last one)
-            if queue and pages_processed < MAX_PAGES:
-                await asyncio.sleep(RATE_LIMIT_SECONDS)
+                # Rate-limit between requests (skip after the last one)
+                if queue and pages_processed < MAX_PAGES:
+                    await asyncio.sleep(RATE_LIMIT_SECONDS)
 
     write_error_report(errors, today)
+
+    for line in format_decision_summary(filter_stats):
+        logger.info(line)
 
     logger.info(
         "Done. %d succeeded, %d failed, %d skipped (fresh cache) out of %d URLs visited.",

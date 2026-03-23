@@ -42,6 +42,15 @@ import openpyxl
 import pymupdf4llm
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig
 from slugify import slugify
+from url_filter import (
+    ALLOWED_DOMAIN,
+    BLOCKED_DOMAINS,
+    DecisionStats,
+    UrlDecisionStore,
+    evaluate_rag_url,
+    format_decision_summary,
+    normalize_url,
+)
 
 # ---------------------------------------------------------------------------
 # Konfiguration — identisch mit main.py
@@ -49,13 +58,7 @@ from slugify import slugify
 
 SEED_URLS      = ["https://www.hs-hannover.de/"]
 MAX_PAGES      = 40000
-ALLOWED_DOMAIN = "hs-hannover.de"
 MAX_AGE_DAYS   = 7
-
-# Subdomains die beim Crawlen komplett ignoriert werden sollen
-BLOCKED_DOMAINS = {
-    "serwiss.bib.hs-hannover.de",
-}
 
 OUTPUT_DIR         = Path(__file__).parent / "data" / "ingested"
 RATE_LIMIT_SECONDS = 2
@@ -73,25 +76,6 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # URL-Hilfsfunktionen (aus main.py übernommen)
 # ---------------------------------------------------------------------------
-
-
-def normalize_url(url: str) -> str:
-    try:
-        parsed = urlparse(url)
-        path = parsed.path
-        if path != "/" and path.endswith("/"):
-            path = path.rstrip("/")
-        return parsed._replace(path=path, query="", fragment="", params="").geturl()
-    except ValueError:
-        return url
-
-
-def is_same_domain(url: str) -> bool:
-    """Gibt True zurück wenn url zur erlaubten Domain gehört und nicht geblockt ist."""
-    netloc = urlparse(url).netloc.lower()
-    if netloc in BLOCKED_DOMAINS:
-        return False
-    return netloc == ALLOWED_DOMAIN or netloc.endswith("." + ALLOWED_DOMAIN)
 
 
 def make_filename(url: str, today: str) -> str:
@@ -155,7 +139,9 @@ def extract_links_from_body(body: str) -> set[str]:
     return found
 
 
-def analyse_ingested_dir() -> tuple[dict, dict, set[str]]:
+def analyse_ingested_dir(
+    decision_store: UrlDecisionStore,
+) -> tuple[dict, dict, set[str], DecisionStats]:
     """Analysiert data/ingested/ und gibt drei Strukturen zurück:
 
     fresh    : {norm_url: filepath}   — aktuell gescrapte URLs
@@ -167,6 +153,7 @@ def analyse_ingested_dir() -> tuple[dict, dict, set[str]]:
     fresh:      dict[str, Path] = {}
     stale:      dict[str, Path] = {}
     all_links:  set[str]        = set()
+    filter_stats = DecisionStats()
 
     md_files = sorted(OUTPUT_DIR.glob("*.md"))
     logger.info("Analysiere %d Markdown-Dateien …", len(md_files))
@@ -181,22 +168,25 @@ def analyse_ingested_dir() -> tuple[dict, dict, set[str]]:
         source_url = meta.get("source_url", "")
         crawl_date_str = meta.get("crawl_date", "")
 
-        if not source_url:
-            continue
+        if source_url:
+            source_decision = evaluate_rag_url(source_url)
+            filter_stats.add(source_decision)
+            decision_store.record(source_decision, source="resume")
 
-        norm = normalize_url(source_url)
+            if source_decision.is_allowed:
+                norm = source_decision.normalized_url
 
-        # Frische-Prüfung anhand crawl_date im Header
-        try:
-            file_date = date.fromisoformat(crawl_date_str)
-            is_fresh  = file_date >= cutoff
-        except ValueError:
-            is_fresh = False
+                # Frische-Prüfung anhand crawl_date im Header
+                try:
+                    file_date = date.fromisoformat(crawl_date_str)
+                    is_fresh  = file_date >= cutoff
+                except ValueError:
+                    is_fresh = False
 
-        if is_fresh:
-            fresh[norm] = filepath
-        else:
-            stale[norm] = filepath
+                if is_fresh:
+                    fresh[norm] = filepath
+                else:
+                    stale[norm] = filepath
 
         # Links aus dem Body extrahieren
         if "---" in text:
@@ -206,21 +196,25 @@ def analyse_ingested_dir() -> tuple[dict, dict, set[str]]:
             body = text
 
         for link in extract_links_from_body(body):
-            try:
-                norm_link = normalize_url(link)
-                if is_same_domain(norm_link):
-                    all_links.add(norm_link)
-            except Exception:
-                continue
+            link_decision = evaluate_rag_url(link)
+            filter_stats.add(link_decision)
+            decision_store.record(link_decision, source="resume")
+            if link_decision.is_allowed:
+                all_links.add(link_decision.normalized_url)
 
     # URLs die in Links auftauchen, aber nicht als fresh bekannt sind
     all_scraped = set(fresh) | set(stale)
     discovered = all_links - all_scraped
 
-    return fresh, stale, discovered
+    return fresh, stale, discovered, filter_stats
 
 
-def print_report(fresh: dict, stale: dict, discovered: set) -> None:
+def print_report(
+    fresh: dict,
+    stale: dict,
+    discovered: set,
+    filter_stats: DecisionStats,
+) -> None:
     """Gibt eine übersichtliche Analyse auf der Konsole aus."""
     total = len(fresh) + len(stale) + len(discovered)
     print()
@@ -247,6 +241,12 @@ def print_report(fresh: dict, stale: dict, discovered: set) -> None:
             print(f"  {url}")
         if len(discovered) > 10:
             print(f"  … und {len(discovered) - 10} weitere")
+
+    summary_lines = format_decision_summary(filter_stats, max_reasons=8, max_samples=3)
+    if summary_lines:
+        print("\nRAG-Filter-Zusammenfassung:")
+        for line in summary_lines:
+            print(f"  {line}")
     print()
 
 
@@ -348,10 +348,11 @@ def write_error_report(errors: list[dict], today: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-async def run_crawl(to_crawl: set[str]) -> None:
+async def run_crawl(to_crawl: set[str], decision_store: UrlDecisionStore) -> None:
     """Crawlt alle URLs in to_crawl (stale + discovered)."""
     today   = date.today().isoformat()
     errors: list[dict] = []
+    filter_stats = DecisionStats()
 
     config = CrawlerRunConfig(
         css_selector="main, .content-main, #content, .frame-default",
@@ -425,11 +426,15 @@ async def run_crawl(to_crawl: set[str]) -> None:
                         href = link_dict.get("href", "")
                         if not href or not href.startswith("http"):
                             continue
-                        norm_href = normalize_url(href)
-                        if norm_href not in visited and is_same_domain(norm_href):
-                            visited.add(norm_href)
-                            queue.append(norm_href)
-                            referrers[norm_href] = url
+                        decision = evaluate_rag_url(href)
+                        filter_stats.add(decision)
+                        decision_store.record(decision, source="resume")
+                        if not decision.is_allowed:
+                            continue
+                        if decision.normalized_url not in visited:
+                            visited.add(decision.normalized_url)
+                            queue.append(decision.normalized_url)
+                            referrers[decision.normalized_url] = url
                             total += 1
 
                 visited.add(normalize_url(url))
@@ -448,6 +453,8 @@ async def run_crawl(to_crawl: set[str]) -> None:
                 await asyncio.sleep(RATE_LIMIT_SECONDS)
 
     write_error_report(errors, today)
+    for line in format_decision_summary(filter_stats):
+        logger.info(line)
     logger.info(
         "Fertig. %d erfolgreich, %d fehlgeschlagen von %d verarbeiteten URLs.",
         success, fail, done,
@@ -473,22 +480,23 @@ async def main() -> None:
         logger.error("Ausgabeverzeichnis nicht gefunden: %s", OUTPUT_DIR)
         sys.exit(1)
 
-    # ── Analyse ───────────────────────────────────────────────────────────
-    fresh, stale, discovered = analyse_ingested_dir()
-    print_report(fresh, stale, discovered)
+    with UrlDecisionStore() as decision_store:
+        # ── Analyse ───────────────────────────────────────────────────────
+        fresh, stale, discovered, filter_stats = analyse_ingested_dir(decision_store)
+        print_report(fresh, stale, discovered, filter_stats)
 
-    to_crawl = set(stale) | discovered
+        to_crawl = set(stale) | discovered
 
-    if not to_crawl:
-        logger.info("Alle bekannten URLs sind aktuell. Kein Crawl notwendig.")
-        return
+        if not to_crawl:
+            logger.info("Alle bekannten URLs sind aktuell. Kein Crawl notwendig.")
+            return
 
-    if args.dry_run:
-        logger.info("--dry-run: Crawl wird nicht gestartet.")
-        return
+        if args.dry_run:
+            logger.info("--dry-run: Crawl wird nicht gestartet.")
+            return
 
-    # ── Crawl ─────────────────────────────────────────────────────────────
-    await run_crawl(to_crawl)
+        # ── Crawl ─────────────────────────────────────────────────────────
+        await run_crawl(to_crawl, decision_store)
 
 
 if __name__ == "__main__":
