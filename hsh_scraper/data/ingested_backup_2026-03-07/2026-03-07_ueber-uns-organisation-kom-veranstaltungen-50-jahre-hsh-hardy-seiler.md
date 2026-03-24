@@ -1,0 +1,31 @@
+---
+source_url: "https://www.hs-hannover.de/ueber-uns/organisation/kom/veranstaltungen/50-jahre-hsh/hardy-seiler"
+title: "https://www.hs-hannover.de/ueber-uns/organisation/kom/veranstaltungen/50-jahre-hsh/hardy-seiler"
+crawl_date: "2026-03-07"
+content_type: "html"
+---
+
+[ Hochschule  
+Hannover  University of  
+applied sciences  
+and arts  ](https://www.hs-hannover.de/ueber-uns/organisation/kom/veranstaltungen/50-jahre-hsh/hardy-seiler)
+![](https://www.hs-hannover.de/fileadmin/_processed_/b/8/csm_Hardy_Seiler_Thumbnail_WEB_842f5a9c50.jpg?rbiFocus=mobile)
+## Hardy Seiler
+Hardy Seiler, geboren 1987, ist ausgezeichneter Designer, Art Director & Gründer von [Bureau Hardy Seiler](https://hardyseiler.de/), ein Designbüro für Corporate, Editorial, Grafik- und Webdesign sowie Dozent und Initiator diverser Projekte und Veranstaltungen. Er studierte
+Während des Studiums blickte Hardy Seiler in die Themenwelten von Produktdesign, Innenarchitektur und Fotografie. Irgendwann wurde seine Leidenschaft für Corporate Design und Branding geweckt. Typografie, Logoentwicklung und Farbdefinition sind auch heute Themen seiner Tätigkeit. Seine Bachelorarbeit war eine Kooperation mit Multimedia-Studierenden und nochmal eine ganz neue Erfahrung - das Ergebnis war ein Animationsfilm mit großer Reichweite und einigen Folgeaufträgen.
+Das Bureau Hardy Seiler existiert seit 2009 mit Anfängen in Berlin, hat seinen Sitz heute in Hannover und arbeitet in zahlreichen Projekten zusammen mit anderen Expert*innen, um komplexe Aufgaben zu lösen. Zu den Kunden zählen viele namenhafte Unternehmen – national sowie international.
+Für die Gestaltung des Kulturentwicklungsplans der Stadt Hannover hat Hardy Seiler kürzlich den iF Award und den German Design Award gewonnen. Weitere Auszeichnungen, mit denen er bereits prämiert wurde, sind: European Design Award, Art Directors Club, red dot award: communication design.
+Im Interview erzählt uns Hardy Seiler welche Schwerpunkte er in seinem Studium gelegt hat, was er heutigen Studierenden mit auf den Weg geben würde und wie und woran er heute arbeitet.
+## Interview
+**Welche Schwerpunkte hattest du in deinem Studium gelegt? Und warum?**  
+Ich bin nicht sicher ob man von einem echten Schwerpunkt in meinem Studium sprechen kann. Jedenfalls nicht aus heutiger Sicht. Vielmehr musste ich mich und meine Interessen finden. Ich habe verschiedene Kurse belegt, an Exkursionen anderer Studiengänge teilgenommen und Projekte parallel zum Studium mit Kommilitonen gestartet. In den Interdisziplinären Grundlagen konnte ich in die Themenwelten von Produktdesign, Innenarchitektur und Fotografie blicken. Der andere Umgang mit Farbe, Form und Layout hat mich immer interessiert und gab mir den Blick über den Tellerrand. Irgendwann wurde meine Leidenschaft für Corporate Design und Branding geweckt. Typografie, Logoentwicklung und Farbdefinition sind auch heute Themen meiner Tätigkeit. Meine Bachelorarbeit war eine Kooperation mit Multimedia-Studierenden und nochmal eine ganz neue Erfahrung - das Ergebnis war ein Animationsfilm mit großer Reichweite und einigen Folgeaufträgen.   
+  
+**Rückblickend auf deine Studienzeit: Was möchtest du heutigen Studierenden mit auf den Weg geben?**  
+Das besondere an der HSH sind die vielen Möglichkeiten der Vernetzung innerhalb eines Gebäudes. Wer das Seminarangebot und die Architektur richtig nutzt, hat die Möglichkeit zukünftige Expert*innen und aktuelle Talente aus anderen Bereichen kennenzulernen. Ich halte ein diverses Netzwerk neben der eigenen Entwicklung für den wichtigsten Meilenstein und absolut essentiell für die weitere Karriere. Mein heutiges Netzwerk hat seinen Ursprung im Studium. Dabei können Euch Professor*innen und Leerpläne nur bedingt helfen. Dann wäre da noch die Angst vor schlechten Entwürfen. Die sollte man schnell loswerden, oder wie Karl Lagerfeld mal sagte: “99 Prozent von dem, was ich mache, geht in den Papierkorb.“ Genau das Gegenteil sehe ich bei vielen Praktikant*innen, die eine Aufgabe bekommen und selten mehr als einen Entwurf präsentieren, der wird dann etwas abgeändert und der muss es dann sein. Ich glaube dass ich den besten Entwurf erst gefunden habe, nachdem ich alle anderen aussortiert habe. Soll heißen: Machen, anders machen, ganz anders machen...  
+  
+**Wie sieht dein heutiger Arbeitsalltag aus?**  
+Natürlich gibt es Dinge die ich neben dem Gestalten täglich wiederhole, wie z.B. mit einem entspannten Frühstück in den Tag starten, mit dem Rad in den Hafven fahren oder das Beantworten von Emails. Das Gute an meinen Tätigkeiten ist, dass es keinen Alltag gibt. Als Selbständiger gestalte ich meine Tagesabläufe selbst. Oft plane ich in Wochensprints. Die Aufgaben die ich lösen möchte sind unterschiedlich und erfordern individuelle Herangehensweisen. Als Mitgründer vom Hafven und Initiator verschiedener Projekte habe ich mir zusätzlich Abwechslung geschaffen. Das motiviert mich immer wieder aufs Neue.  
+  
+**In welchem Unternehmen (oder Branche) sind Sie tätig und in welcher Funktion?**  
+Ich bin Designer, Art Director & Gründer von Bureau Hardy Seiler, ein Designbüro für Corporate, Editorial, Grafik- und Webdesign sowie Dozent und Initiator diverser Projekte und Veranstaltungen. Das Bureau Hardy Seiler existiert seit 2009 mit Anfängen in Berlin, hat seinen Sitz heute in Hannover und arbeitet in zahlreichen Projekten zusammen mit anderen Experten, um komplexe Aufgaben zu lösen. Zu den nationalen und internationalen Kunden gehören u.a.   
+Google, NVIDIA, Science Museum London, PEY, ACTON, Curate, Landeshauptstadt Hannover, Freies Theater Hannover, Direktorenhaus Berlin, Bicicli, Sparkasse-Kreditpartner, Schlütersche Verlagsgesellschaft, Kompetenzzentrum Kultur- und Kreativwirtschaft des Bundes, Musikland Niedersachsen, Kammermusik Hannover. Ich bin außerdem Mitgründer vom Hafven und verantwortlich für das Corporate Design, die Website und für unser neues Produkt [Collaborates.io](http://Collaborates.io) als Projekt Manager. Hafven, angefangen als erster Coworking und Maker Space in Hannover, bietet heute Zugang zu einer der größten Innovation Communities Europas mit eigenem Impact Accelerator für Startups, großen Werkstätten für Maker oder Handwerker*innen, mehreren Event Räumen und eigenen Veranstaltungs-Formaten. Das Bureau Hardy Seiler ist heute ebenfalls dort zu Hause.

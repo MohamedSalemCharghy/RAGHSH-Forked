@@ -1,0 +1,72 @@
+---
+source_url: "https://f4.hs-hannover.de/forschung/veroeffentlichungen/2019"
+title: "Veröffentlichungen der Fakultät IV"
+crawl_date: "2026-03-07"
+content_type: "html"
+---
+
+![](https://f4.hs-hannover.de/fileadmin/_processed_/0/0/csm_Blick_in_die_Glasfront_1a7b5158c9.jpg?rbiFocus=mobile)
+#  Veröffentlichungen der Fakultät IV 
+## 2019
+Dötterl, J., Bruns, R., Dunkel, J., Ossowski, S.: "Stream-based perception for cognitive agents in mobile ecosystems", in the journal: AI Communications, vol. 32, no. 4, IOS Press, 2019, pp. 271-286, DOI: 10.3233/AIC-190614.
+Bruns, R., Dunkel, J., Offel, N.: "Learning of Complex Event Processing Rules with Genetic Programming", in the journal: Expert Systems With Applications, Volume 129, Elsevier, 2019, pp. 186-199, DOI: [doi.org/10.1016/j.eswa.2019.04.007](https://doi.org/10.1016/j.eswa.2019.04.007).
+Knauf, F., Bruns, R.: "A Peek into the Swarm: Analysis of the Gravitational Search Algorithm and Recommendations for Parameter Selection", in: Proceedings of the Genetic and Evolutionary Computation Conference (GECCO 2019), Prague, Czech Republic, ACM New York, NY, USA, 2019, pp. 30-38.
+Dötterl, J., Bruns, R., Dunkel, J., Ossowski, S.: "Stream-Based Perception for Agents on Mobile Devices", in Lujak, M. (Ed.): Agreement Technologies, AT 2018, Bergen, Norway, LNAI 11327, Springer, Cham, 2019, pp. 73-87, DOI: [doi.org/10.1007/978-3-030-17294-7_6](https://doi.org/10.1007/978-3-030-17294-7_6).
+Murakami, S., Ohta, T., Dunkel, J. Kakuda, Y.: Simulation of evacuation route guidance considering evacuation situation change in MANET-based building evacuation systems, 12th International Workshop on Autonomous Self-Organizing Networks in Workshop (ASON) at IEEE 4th International Symposium on Computing (CANDAR), Nagasaki, November 2019
+Dötterl, J., Bruns, R., Dunkel, J., Ossowski, S.: "Stream-based perception for cognitive agents in mobile ecosystems", in: AI ommunications, pp. 271-286, 32(4), DOI 10.3233/AIC-190614, 2019.
+R. Bruns, J. Dunkel, N. Offel: Learning of complex event processing rules with genetic programming. Expert Systems and Applications, [129](https://dblp.uni-trier.de/db/journals/eswa/eswa129.html#BrunsDO19): 186-199 (2019)
+Ohta, Tomoyuki; Dunkel, Jürgen: Simulation of Evacuation Route Guidance in MANET-based Building Evacuation Systems. VALUETOOLS 2019 – 12th EAI International Conference on Performance Evaluation Methodologies and Tools, Palma de Mallorca, 2019. 
+Vanini, U./ Krolak, T./ Langguth, H., Controlling: Grundlagen einer entscheidungsorientierten Unternehmensführung 2. Aufl. UVK München
+Clasen, M. (2019): Von Robotern, Drohnen und Selbstfahrern. in: Land & Forst, Heft 46, 172. Jahrgang, 14.11.2019, S. 52-53. Ähnlich auch in weiteren landwirtschaftlichen Wochenblättern erschienen.
+Renners, L., Heine, F., Kleiner, C., Dreo-Rodosek, G. (2019), Concept and Practical Evaluation for Adaptive and Intelligible Prioritization for Network Security Incidents, in: International Journal on Cyber Situational Awareness, Bd. 4, Nr. 1, S. 99-127.
+Kleiner, C., Koschel, A. (2019), Lessons Learned in 10 years of Distributed Systems Capstones, in: Hawthorne, E., Perez-Quinones, M., Heckman, S., Zhang, J. (Hrsg.), Proceedings of the 50th ACM Technical Symposium on Computer Science Education, SIGCSE 2019, ACM: New York, NY, S. 1265.
+Heithecker, D., Tschuschke, D., Bedeutung von Erträgen und Ertrags-Volatilitäten, in: Heithecker, D., Tschuschke, D. (Hrsg.), Geschäftsmodellanalyse, 2. Aufl., Finanz Colloquium Heidelberg: Heidelberg, 2019, S. 409-475.
+Heithecker, D., Tschuschke, D. (Hrsg.), Geschäftsmodellanalyse, 2. Aufl., Finanz Colloquium Heidelberg: Heidelberg, 2019.
+Lange, M., Koschel, A., Hausotter, A., Howeihe, P. (2019), Consistency for Microservices - A Legacy Insurance Core Application Migration Example, in: Hausotter, A. (Hrsg.), Proc. 11th International Conferences on Advanced Service Computing (SERVICE COMPUTATION 2019), IARIA: Venice, Italy, S. 1-5.
+Koschel, A., Astrova, I., Blankschyn, M., Schöner, D., Schulze, K. (2019), Evaluating the RESTfulness of “APIs from the Rough”, in: Bozzon, A., Mayo, F.D., Filipe , J. (Hrsg.), Proc. 15th International Conference on Web Information Systems and Technologies (WEBIST 2019), vol. 1, SciTePress: Vienna, Austria, S. 281-288.
+Astrova, I., Koschel, A., Kobert, S., Naumann, J., Ruhe, T., Starodubtsev, O. (2019), Evaluating RuleCore as Event Processing Network Model, in: Bozzon, A., Mayo, F.D., Filipe , J. (Hrsg.), Proc. 15th International Conference on Web Information Systems and Technologies (WEBIST 2019), vol. 1, SciTePress: Vienna, Austria, S. 297-300.
+Koschel, A., Blankschyn, M., Schulze, K., Schöner, D., Astrova, I., Astrov, I. (2019), RESTfulness of APIs in the Wild, in: IEEE (Hrsg.), Proc. IEEE World Congress on Services (SERVICES 2019), IEEE, Curran Associates: Milan, Italy, S. 382-383.
+Lange, M., Koschel, A., Hausotter, A. (2019), Microservices in Higher Education - Migrating a Legacy Insurance Core Application, in: Giallorenzo, S., Peressotti, M., Rademacher, F., Sachweh, S. (Hrsg.), Proc. 2nd International Conference on Microservices (Microservices 2019), University of Applied Sciences and Arts Dortmund, Dortmund, Germany: Dortmund, Germany, S. 1-8, [Link](https://www.conf-micro.services/2019/papers/Microservices_2019_paper_8.pdf)
+Kleiner, C., Koschel, A. (2019), Lessons Learned in 10 years of Distributed Systems Capstones, in: ACM (Hrsg.), Proc. 50th ACM Technical Symposium on Computer Science Education (SIGCSE '19), ACM: New York, NY, USA, S. 1265-1265.
+Koschel A., Heine F., Astrova I. (2019), Harnessing Cloud Scalability to Hadoop Clusters, in: Themistocleous M., Rupino da Cunha P (Hrsg.), Information Systems. EMCIS 2018. Lecture Notes in Business Information Processing, vol 341, Springer: Cham, S. 59-71.
+Mahbouba, G., Koschel, A., Rausch, A. (2019), Software Architecture Fundamentals A Study Guide for the Certified Professional for Software Architecture® – Foundation Level – iSAQB compliant, 1. Aufl., dpunkt.verlag: Heidelberg.
+Ahlers, V., Hellmann, B., Dreo Rodosek, G. (2019), A user study of the visualization-assisted evaluation and management of network security detection events and policies, in: Proceedings of the 2019 10th IEEE International Conference on Intelligent Data Acquisition and Advanced Computing Systems: Technology and Applications (IDAACS 2019). September 18–21, 2019, Metz, France, IEEE, S. 668–673.
+Pump, R., Baumann, M., Bellok, J.-T., Ahlers, V., Koschel, A. (2019), Kombinierte Simulation logistikrelevanter Verkehrszusammenhänge, in: Wittmann, J. (Hrsg.), Simulation in Umwelt- und Geowissenschaften (Workshop Kassel 2019), ASIM Mitteilung AM 171, Shaker: Düren, S. 55–66.
+Pump, R., Koschel, A., Ahlers, V. (2019), Applying microservice principles to simulation tools, in: Hausotter, A. (Hrsg.), SERVICE COPUTATION 2019: The Eleventh International Conference on Advanced Service Computing, IARIA, S. 6–9.
+Schnitzler, C. C. / Küster, J.: Der Effekt agiler Arbeitsweisen auf Wohlbefinden gemäß PERMA, in: Wesely S. (Hrsg.): Arbeit und Führung 4.0? Antworten der Positiven Psychologie, Pabst Science Publisher, Lengerich, 2019, S. 100 – 113.
+Adam, P. (2019), Agil in der ISO 9001 – wie Sie agile Prozesse in Ihr Qualitätsmanagement integrieren, Springer Gabler: Wiesbaden [Link](https://www.dpbolvw.net/click-9207045-12898971?url=https%3A%2F%2Fwww.springer.com%2Fde%2Fbook%2F9783658283100)
+Fiebig, M., Heithecker, D., Ganzheitliche Risikoinventur in Spezialinstituten, in: Janßen, S., Riediger, H. (Hrsg.), Praktikerhandbuch Risikoinventur, 2. Aufl., Finanz Colloquium Heidelberg: Heidelberg, 2019, S. 187-243.
+Heithecker, D., Umgang mit Modellrisiken, in: Janßen, S., Riediger, H. (Hrsg.), Praktikerhandbuch Risikoinventur, 2. Aufl., Finanz Colloquium Heidelberg: Heidelberg, 2019, S. 403-448.
+Disterer, G. (2019), Systematizing IT Risks, in: Journal of Information Security, Bd. 10, Nr. 4, S. 237-249. [Link](https://f4.hs-hannover.de/fileadmin/HsH/Forms/Fakultaet_IV/Ueber_Uns/Personen/Arbeitspapiere/19-11-01-Disterer_Systematizing_IT_Risks_2019.pdf)
+Clasen, M. (2019): Die vorhandenen Daten sinnvoll nutzen. in: Land & Forst, Heft 37, 172. Jahrgang, 12.09.2019, S. 48-49.
+Clasen, M. (2019): Der Umgang mit Komplexität bei SAP und Bundeswehr – eine subjektive Betrachtung. in: Schmid, A. (eds) Verwaltung, eGovernment und Digitalisierung. Springer Vieweg, Wiesbaden
+Clasen, M. (2019): Wissende Computer verstehen mehr. in: Land & Forst, Heft 35, 172. Jahrgang, 29.08.2019, S. 54-55.
+Clasen, M. (2019): Schichtweise zu einem neuen Produkt. in: Land & Forst, Heft 29, 172. Jahrgang, 18.07.2019, S. 50-51.
+Clasen, M. (2019): Daten und Dinge zusammenhalten – RFID. in: Land & Forst, Heft 24, 172. Jahrgang, 14.06.2019, S. 46-47.
+Clasen, M. (2019): „Computer, bitte füttere die Kühe“. in: Land & Forst, Heft 18, 172. Jahrgang, 03.05.2019, S. 46-47.
+Clasen, M. (2019): Es gibt nicht nur eine Wirklichkeit. in: Land & Forst, Heft 13, 172. Jahrgang, 28.03.2019, S. 61-63.
+Clasen, M. (2019): Ein digitales Abbild der Welt schaffen. in: Land & Forst, Heft 10, 172. Jahrgang, 07.03.2019, S. 56-57.
+Heithecker, D., Governance-Anforderungen im ICAAP, in: Banken-Times SPEZIAL Controlling, Juli/August, (eingestellt am 04.06.2019), 2019. [Link](https://www.fc-heidelberg.de/governance-anforderungen-im-icaap/)
+Heithecker, D., Rezension Riediger, H., Auslagerung & Dienstleister-Steuerung, in: BankPraktiker, 2019, Bd. 13, Nr. 10, S. 310.
+Heithecker, D., Barwertige Risikomessung von Kreditrisiko - Neue ICAAP-Anforderungen der ökonomischen Perspektive, in: Banken-Times SPEZIAL Controlling, Februar, [Link](https://www.fc-heidelberg.de/barwertige-risikomessung-von-kreditrisiken "Opens external link in current window") / (eingestellt am 26.01.2019), 2019.  
+  
+Heithecker, D., Rezension Andrae, S., Hellmich, M., Schmaltz, C., Bankaufsichtliches Risikomanagement, in: BankPraktiker, 2019, Bd. 11, Nr. 02, S. 40.
+Felix Heine, Carsten Kleiner, and Thomas Oelsner. Automated Detection and Monitoring of Advanced Data Quality Rules. In Sven Hartmann, Josef Küng, Sharma Chakravarthy, Gabriele Anderst-Kotsis, A Min Tjoa, and Ismail Khalil, editors, Database and Expert Systems Applications, pages 238–247, Cham, 2019. Springer International Publishing. [Link](https://doi.org/10.1007/978-3-030-27615-7_18)
+Leonard Renners, Felix Heine, Carsten Kleiner, and Gabi Dreo Rodosek. Design and Evaluation of an Approach for Feedback-Based Adaptation of Incident Prioritization. In 2019 2nd International Conference on Data Intelligence and Security (ICDIS), pages 28–35, June 2019. [Link](https://doi.org/10.1109/ICDIS.2019.00012)
+Leonard Renners, Felix Heine, Carsten Kleiner, and Gabi Dreo Rodosek. Adaptive and Intelligible Prioritization for Network Security Incidents. In Cyber Science 2019 Cyber Situaltional Awareness for Predictive Insight and Deep Learning, University of Oxford, June 3-4, 2019. C-MRiC.ORG, June 2019. [Link](https://www.c-mric.com/csa2019)
+Irina Astrova, Arne Koschel, Felix Heine, and Ahto Kalja. Moving Hadoop to the Cloud for Big Data Analytics. In Audrone Lupeikiene, Olegas Vasilecas, and Gintautas Dzemyda, editors, Databases and Information Systems X - Selected Papers from the Thirteenth International Baltic Conference, DB&IS 2018, Trakai, Lithuania, July 1-4, 2018, volume 315 of Frontiers in Artificial Intelligence and Applications, pages 195–209. IOS Press, 2019. [Link](https://doi.org/10.3233/978-1-61499-941-6-195)
+Schmid, A. (2019), Verwaltung, eGovernment und Digitalisierung – Grundlagen, Konzepte und Anwendungsfälle (Hrsg.), Springer Vieweg, Wiesbaden
+Schmid, A. (2019), Verwaltungsinformatik und eGovernment im Zeichen der Digitalisierung – Zeit für ein neues Paradigma, erschienen in: Schmid, Andreas (Hrsg.): Verwaltung, eGovernment und Digitalisierung – Grundlagen, Konzepte und Anwendungsfälle, Wiesbaden 2019, S. 3-20
+Schmid, A., Schäfer, E. (2019), Die Einführung der elektronischen Akte in der Sozialversicherung, in: Schmid, Andreas (Hrsg.): Verwaltung, eGovernment und Digitalisierung – Grundlagen, Konzepte und Anwendungsfälle, Wiesbaden 2019, S. 171-179
+Disterer, G. (2019), Was ist Verwaltungsinformatik?, in: Schmid, A. (Hrsg.), Verwaltung, eGovernment und Digitalisierung - Grundlagen, Konzepte und Anwendungsfälle, Springer Vieweg: Wiesbaden, S. 41-51.
+Disterer, G. (2019), Professional Life of Information System Graduates - Impressions and Experiences, in: Informing Science Institute (Hrsg.), Proc. of Informing Science and Information Technology Education Conference (Insite), ISI: Santa Rosa, S. 413-427.
+Disterer, G. (2019), Studien- und Abschlussarbeiten schreiben - Seminar-, Bachelor- und Masterarbeiten in den Wirtschaftswissenschaften, 8. Aufl., Springer: Berlin Heidelberg. (link.springer.com/book/10.1007/978-3-662-59042-3)
+Schnitzler, C. C., Digitalisierungsinitiativen umsetzen: Ein Reifegradmodell zur organisationalen Anpassung, in: Zeitschrift Führung + Organisation (zfo), 2019, 88. Jg., S. 91 – 97.
+Clasen, M. (2019): „Computer, bitte füttere die Kühe“. in: Land & Forst, Heft 18, 172. Jahrgang, 03.05.2019, S. 46-47.
+Disterer, G., (2019), Formative work experiences of IS graduates, Vortrag an der School Business der Southern Illinois University Edwardsville (SIUE), 19.04.2019.
+Disterer, G. (2019), Studiengang Verwaltungsinformatik an der Hochschule Hannover - Zweiter Jahrgang erfolgreich gestartet, in: eGovenment Computing, Bd. 20, Nr. 2, S. 10.
+Japing, T., & Adam, P. (2019), Die geplante Flexibilität – ISO 9001-konforme Steuerung agiler Prozesse, in: QZ Nr. 03/2019, S. 2-5
+Adam, P. (2019), Ziemlich beste Freunde - Agilität und ISO 9001, in: QZ Nr. 01/2019, S. 44-47 [Link ](https://www.qz-online.de/qz-zeitschrift/archiv/artikel/agilitaet-und-iso-9001--7221820.html "Opens external link in current window")
+Adam, P. (2019), System(at)isch agil – Wie agile Prozesse in ein Managementsystem nach ISO 9001:2015 integriert werden können, Whitepaper, Schriftenreihe Management, [SerWisS](https://doi.org/10.25968/opus-1268 "Opens external link in current window"), [Link](https://doi.org/10.25968/opus-1268 "Opens external link in current window")
+Disterer, G. (2019), Studiengang Verwaltungsinformatik an der Hochschule Hannover, in: Niedersächsische Verwaltungsblätter NdsVBl, Bd. 26, Nr. 2, S. 64-69.
+Schmid, A. (2019), Wirksames Projektcontrolling in Digitalisierungsprojekten, erschienen in: Controlling, 01/2019, S. 47-53

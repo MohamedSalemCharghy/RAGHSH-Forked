@@ -1,0 +1,151 @@
+---
+source_url: "https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject"
+title: "https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject"
+crawl_date: "2026-03-07"
+content_type: "html"
+---
+
+  * [DDC-Sachgruppen](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/2)
+  * [000 Allgemeines, Informatik, Informationswissensch...](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/3)
+
+
+## 020 Bibliotheks- und Informationswissenschaft
+  * [020 Bibliotheks- und Informationswissenschaften](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/128) (3) [ ![RSS-Feed abonnieren](https://serwiss.bib.hs-hannover.de/layouts/opus4/img/feed_small.png) ](https://serwiss.bib.hs-hannover.de/rss/index/index/searchtype/collection/id/128)
+  * 021 Beziehungen zwischen Bibliotheken [ ![RSS-Feed abonnieren](https://serwiss.bib.hs-hannover.de/layouts/opus4/img/feed_small.png) ](https://serwiss.bib.hs-hannover.de/rss/index/index/searchtype/collection/id/129)
+  * 022 Verwaltung von Bibliotheksgebäuden [ ![RSS-Feed abonnieren](https://serwiss.bib.hs-hannover.de/layouts/opus4/img/feed_small.png) ](https://serwiss.bib.hs-hannover.de/rss/index/index/searchtype/collection/id/130)
+  * 023 Personalmanagement [ ![RSS-Feed abonnieren](https://serwiss.bib.hs-hannover.de/layouts/opus4/img/feed_small.png) ](https://serwiss.bib.hs-hannover.de/rss/index/index/searchtype/collection/id/131)
+  * 025 Bibliothekarische Tätigkeiten [ ![RSS-Feed abonnieren](https://serwiss.bib.hs-hannover.de/layouts/opus4/img/feed_small.png) ](https://serwiss.bib.hs-hannover.de/rss/index/index/searchtype/collection/id/132)
+  * 026 Spezialbibliotheken [ ![RSS-Feed abonnieren](https://serwiss.bib.hs-hannover.de/layouts/opus4/img/feed_small.png) ](https://serwiss.bib.hs-hannover.de/rss/index/index/searchtype/collection/id/133)
+  * 027 Allgemeinbibliotheken [ ![RSS-Feed abonnieren](https://serwiss.bib.hs-hannover.de/layouts/opus4/img/feed_small.png) ](https://serwiss.bib.hs-hannover.de/rss/index/index/searchtype/collection/id/134)
+  * 028 Lesen und Nutzung anderer Informationsmedien [ ![RSS-Feed abonnieren](https://serwiss.bib.hs-hannover.de/layouts/opus4/img/feed_small.png) ](https://serwiss.bib.hs-hannover.de/rss/index/index/searchtype/collection/id/135)
+
+
+### Filtern
+#### Autor*in 
+  * [Wartena, Christian](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/author_facetfq/Wartena%2C+Christian) (23)
+  * [Blümel, Ina](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/author_facetfq/Bl%C3%BCmel%2C+Ina) (6)
+  * [Charbonnier, Jean](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/author_facetfq/Charbonnier%2C+Jean) (5)
+  * [Josi, Frieda](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/author_facetfq/Josi%2C+Frieda) (5)
+  * [Aga, Rosa Tsegaye](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/author_facetfq/Aga%2C+Rosa+Tsegaye) (3)
+  * [Heid, Ulrich](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/author_facetfq/Heid%2C+Ulrich) (3)
+  * [Heller, Lambert](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/author_facetfq/Heller%2C+Lambert) (3)
+  * [Sohmen, Lucia](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/author_facetfq/Sohmen%2C+Lucia) (3)
+  * [Behm-Steidel, Gudrun](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/author_facetfq/Behm-Steidel%2C+Gudrun) (2)
+  * [Bichtemann, Sven](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/author_facetfq/Bichtemann%2C+Sven) (2)
+
+
+[ + weitere](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/facetNumber_author_facet/all#author_facet_facet "alle Ergebnisse anzeigen")
+#### Erscheinungsjahr 
+  * [2025](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/yearfq/2025) (3)
+  * [2023](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/yearfq/2023) (1)
+  * [2022](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/yearfq/2022) (5)
+  * [2021](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/yearfq/2021) (1)
+  * [2020](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/yearfq/2020) (1)
+  * [2019](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/yearfq/2019) (6)
+  * [2018](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/yearfq/2018) (5)
+  * [2017](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/yearfq/2017) (2)
+  * [2016](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/yearfq/2016) (5)
+  * [2014](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/yearfq/2014) (1)
+
+
+[ + weitere](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/facetNumber_year/all#year_facet "alle Ergebnisse anzeigen")
+#### Dokumenttyp 
+  * Konferenzveröffentlichung (40) [(entfernen)](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/rows/10)
+
+
+#### Sprache 
+  * [Englisch](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/languagefq/eng) (33)
+  * [Deutsch](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/languagefq/deu) (7)
+
+
+#### Volltext vorhanden 
+  * [ja](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/has_fulltextfq/true) (40)
+
+
+#### Gehört zur Bibliographie 
+  * [nein](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/belongs_to_bibliographyfq/false) (40)
+
+
+#### Schlagworte 
+  * [Bibliothek](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/subjectfq/Bibliothek) (4)
+  * [Text Mining](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/subjectfq/Text+Mining) (4)
+  * [Ausbildung](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/subjectfq/Ausbildung) (3)
+  * [Information Retrieval](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/subjectfq/Information+Retrieval) (3)
+  * [Informationsmanagement](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/subjectfq/Informationsmanagement) (3)
+  * [Klassifikation](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/subjectfq/Klassifikation) (3)
+  * [Semantik](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/subjectfq/Semantik) (3)
+  * [Ambiguität](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/subjectfq/Ambiguit%C3%A4t) (2)
+  * [Bibliothekswesen](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/subjectfq/Bibliothekswesen) (2)
+  * [Biobank](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/subjectfq/Biobank) (2)
+
+
+[ + weitere](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/facetNumber_subject/all#subject_facet "alle Ergebnisse anzeigen")
+#### Institut 
+  * [Fakultät III - Medien, Information und Design](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/institutefq/Fakult%C3%A4t+III+-+Medien%2C+Information+und+Design) (37)
+  * [Sonstige Einrichtungen](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/institutefq/Sonstige+Einrichtungen) (2)
+  * [Fakultät IV - Wirtschaft und Informatik](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/institutefq/Fakult%C3%A4t+IV+-+Wirtschaft+und+Informatik) (1)
+
+
+###  40 Treffer
+  * **1** bis **10**
+  * [](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/10/rows/10/doctypefq/conferenceobject "Nächste Seite")
+  * [](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/30/rows/10/doctypefq/conferenceobject "Letzte Seite")
+
+
+Export
+  * [BibTeX](https://serwiss.bib.hs-hannover.de/export/index/bibtex/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject "Export BibTeX")
+  * [CSV](https://serwiss.bib.hs-hannover.de/export/index/csv/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject "Export CSV")
+  * [RIS](https://serwiss.bib.hs-hannover.de/export/index/ris/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject "Export RIS")
+
+
+10
+  * [10](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject)
+  * [20](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/20/doctypefq/conferenceobject)
+  * [50](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/50/doctypefq/conferenceobject)
+  * [100](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/100/doctypefq/conferenceobject)
+
+
+Sortieren nach
+  * [ Jahr ](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/sortfield/year/sortorder/asc)
+  * [ Jahr ](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/sortfield/year/sortorder/desc)
+  * [ Titel ](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/sortfield/title/sortorder/asc)
+  * [ Titel ](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/sortfield/title/sortorder/desc)
+  * [ Autor*in ](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/sortfield/author/sortorder/asc)
+  * [ Autor*in ](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/sortfield/author/sortorder/desc)
+
+
+[ProvideQ: A Web-Based Knowledge Platform for Assessing Preanalytical Influences on Biomolecules in Biospecimens](https://serwiss.bib.hs-hannover.de/frontdoor/index/index/searchtype/collection/id/15/start/0/rows/10/doctypefq/conferenceobject/docId/3807) (2025) 
+[Bichtemann, Sven](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Bichtemann%2C+Sven) ; [Bott, Oliver J.](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Bott%2C+Oliver+J.) ; [Apfel-Starke, Johanna](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Apfel-Starke%2C+Johanna) ; [Scholz, Vicky](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Scholz%2C+Vicky) ; [Illig, Thomas](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Illig%2C+Thomas) ; [Haag, Sara](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Haag%2C+Sara)
+Introduction: Preanalytical factors significantly impact the stability of biomolecules in biospecimens, affecting the reliability of biomedical research and diagnostics. This paper presents the development of ProvideQ (Database for pre-analytical variability and biospecimen quality), a web-based platform designed to centralize access to research findings on these influences. Methods: Building on an initial prototype, we implemented a validated criteria catalog for data quality, an efficient search system handling incomplete inputs, and SPREC 4.0 integration for standardized coding of preanalytical variables. User feedback from usability tests enhanced the platform’s interface. Results: Results include an improved data model, a Python-based literature import module, and an intuitive frontend using Next.js and React. Conclusion: ProvideQ supports analyte- and sample-centric searches, demonstrating its potential as a valuable tool in biobanking and research. Future enhancements include expanding the database and integrating AI-driven analytics of scientific publications on pre-analytical factors to facilitate the import of research results into the platform.
+[AI for Extracting Pre-Analytical Variability Data from Biomedical Literature: Feasibility and Validation](https://serwiss.bib.hs-hannover.de/frontdoor/index/index/searchtype/collection/id/15/start/1/rows/10/doctypefq/conferenceobject/docId/3806) (2025) 
+[Scholz, Vicky](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Scholz%2C+Vicky) ; [Bichtemann, Sven](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Bichtemann%2C+Sven) ; [Bott, Oliver J.](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Bott%2C+Oliver+J.) ; [Illig, Thomas](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Illig%2C+Thomas) ; [Haag, Sara](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Haag%2C+Sara)
+Introduction: The quality and reproducibility of research results from biological samples are significantly influenced by the pre-analytical variability resulting from different conditions during sample collection, storage and processing. Although numerous studies have investigated their effects, standardized and structured reporting remains limited, hindering systematic evaluation. This study explores the potential of Large Language Models (LLMs) for the structured extraction of pre-analytical variability data from scientific literature. Methods: Using a standardized parameter catalog, various LLMs were evaluated with specially designed prompts. Results: Models such as GPT-4.5, o1, DeepSeek R1, and o3 mini high demonstrated promising performance in contextual understanding and structured output generation, particularly for CSV files. However, consistent semantic mapping of complex experimental conditions (e.g., storage time versus temperature) proved challenging. Conclusion: Targeted token reduction significantly improved extraction quality. Overall, the study shows that LLMs can serve as effective tools for supporting structured data extraction in biomedical contexts—though current limitations in reproducibility and contextual fidelity highlight the continued need for expert oversight.
+[Schatzkisten oder Müllhalden? : Wie man die Nutzung öffentlicher Bücherschränke untersuchen kann](https://serwiss.bib.hs-hannover.de/frontdoor/index/index/searchtype/collection/id/15/start/2/rows/10/doctypefq/conferenceobject/docId/3684) (2025) 
+[Bertram, Jutta](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Bertram%2C+Jutta)
+Nach einer definitorischen Annäherung an offene Bücherschränke und einer Skizze ihrer gesellschaftlichen Relevanz gibt der Vortrag eine Übersicht über die Bücherschrankdichte in den deutschen Bundesländern. Er erläutert die Bücherschrankinfrastruktur in Hannover und Bonn und stellt die wichtigsten Ergebnisse aus vier empirischen Studien zur Nutzung von Bücherschränken vor, die an diese Städte angebunden sind. Daraus werden abschließend kritische Erfolgsfaktoren und Forschungslücken abgeleitet.
+[Unsupervised Methods for Domain Specific Ambiguity Detection. The Case of German Physics Language](https://serwiss.bib.hs-hannover.de/frontdoor/index/index/searchtype/collection/id/15/start/3/rows/10/doctypefq/conferenceobject/docId/3209) (2023) 
+[Fontanella, Vitor](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Fontanella%2C+Vitor) ; [Wartena, Christian](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Wartena%2C+Christian) ; [Friege, Gunnar](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Friege%2C+Gunnar)
+Many terms used in physics have a different meaning or usage pattern in general language, constituting a learning barrier in physics teaching. The systematic identification of such terms is considered to be useful for science education as well as for terminology extraction. This article compares three methods based on vector semantics and a simple frequency-based baseline for automatically identifying terms used in general language with domain-specific use in physics. For evaluation, we use ambiguity scores from a survey among physicists and data about the number of term senses from Wiktionary. We show that the so-called Vector Initialization method obtains the best results.
+[What do users expect from image repositories? – Focus group impressions](https://serwiss.bib.hs-hannover.de/frontdoor/index/index/searchtype/collection/id/15/start/4/rows/10/doctypefq/conferenceobject/docId/3056) (2019) 
+[Sohmen, Lucia](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Sohmen%2C+Lucia) ; [Blümel, Ina](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Bl%C3%BCmel%2C+Ina) ; [Heller, Lambert](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Heller%2C+Lambert)
+The NOA project collects and stores images from open access publications and makes them findable and reusable. During the project a focus group workshop was held to determine whether the development is addressing researchers’ needs. This took place before the second half of the project so that the results could be considered for further development since addressing users’ needs is a big part of the project. The focus was to find out what content and functionality they expect from image repositories. In a first step, participants were asked to fill out a survey about their images use. Secondly, they tested different use cases on the live system. The first finding is that users have a need for finding scholarly images but it is not a routine task and they often do not know any image repositories. This is another reason for repositories to become more open and reach users by integrating with other content providers. The second finding is that users paid attention to image licenses but struggled to find and interpret them while also being unsure how to cite images. In general, there is a high demand for reusing scholarly images but the existing infrastructure has room to improve.
+[Rethinking Self-directed Learning for Information Managers - A process model for self-learning materials regarding the degree of complexity -](https://serwiss.bib.hs-hannover.de/frontdoor/index/index/searchtype/collection/id/15/start/5/rows/10/doctypefq/conferenceobject/docId/2575) (2020) 
+[Wucherpfennig, Gerrit](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Wucherpfennig%2C+Gerrit) ; [Steinberg, Monika](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Steinberg%2C+Monika) ; [Wittich, Anke](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Wittich%2C+Anke)
+Self-directed learning is an essential basis for lifelong learning and requires constantly changing, target groupspecific and personalized prerequisites in order to motivate people to deal with modern learning content, not to overburden them and yet to adequately convey complex contexts. Current challenges in dealing with digital resources such as information overload, reduction of complexity and focus, motivation to learn, self-control or psychological wellbeing are taken up in the conception of learning settings within our QpLuS IM project for the study program Information Management and Information Management extra-occupational (IM) at the University of Applied Sciences and Arts Hannover. We present an interactive video on the functionality of search engines as a practical example of a medially high-quality and focused self-learning format that has been methodically produced in line with our agile, media-didactic process and stage model of complexity levels.
+[Wikidata and Wikibase as complementary research data management services for cultural heritage data](https://serwiss.bib.hs-hannover.de/frontdoor/index/index/searchtype/collection/id/15/start/6/rows/10/doctypefq/conferenceobject/docId/2573) (2022) 
+[Rossenova, Lozana](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Rossenova%2C+Lozana) ; [Duchesne, Paul](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Duchesne%2C+Paul) ; [Blümel, Ina](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Bl%C3%BCmel%2C+Ina)
+The NFDI (German National Research Data Infrastructure) consortia are associations of various institutions within a specific research field, which work together to develop common data infrastructures, guidelines, best practices and tools that conform to the principles of FAIR data. Within the NFDI, a common question is: What is the potential of Wikidata to be used as an application for science and research? In this paper, we address this question by tracing current research usecases and applications for Wikidata, its relation to standalone Wikibase instances, and how the two can function as complementary services to meet a range of research needs. This paper builds on lessons learned through the development of open data projects and software services within the Open Science Lab at TIB, Hannover, in the context of NFDI4Culture – the consortium including participants across the broad spectrum of the digital libraries, archives, and museums field, and the digital humanities.
+[Collaborative annotation and semantic enrichment of 3D media: a FOSS toolchain](https://serwiss.bib.hs-hannover.de/frontdoor/index/index/searchtype/collection/id/15/start/7/rows/10/doctypefq/conferenceobject/docId/2574) (2022) 
+[Rossenova, Lozana](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Rossenova%2C+Lozana) ; [Schubert, Zoe](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Schubert%2C+Zoe) ; [Vock, Richard](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Vock%2C+Richard) ; [Sohmen, Lucia](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Sohmen%2C+Lucia) ; [Günther, Lukas](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/G%C3%BCnther%2C+Lukas) ; [Duchesne, Paul](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Duchesne%2C+Paul) ; [Blümel, Ina](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Bl%C3%BCmel%2C+Ina)
+A new FOSS (free and open source software) toolchain and associated workflow is being developed in the context of NFDI4Culture, a German consortium of research- and cultural heritage institutions working towards a shared infrastructure for research data that meets the needs of 21st century data creators, maintainers and end users across the broad spectrum of the digital libraries and archives field, and the digital humanities. This short paper and demo present how the integrated toolchain connects: 1) OpenRefine - for data reconciliation and batch upload; 2) Wikibase - for linked open data (LOD) storage; and 3) Kompakkt - for rendering and annotating 3D models. The presentation is aimed at librarians, digital curators and data managers interested in learning how to manage research datasets containing 3D media, and how to make them available within an open data environment with 3D-rendering and collaborative annotation features.
+[Predicting Visible Terms from Image Captions using Concreteness and Distributional Semantics](https://serwiss.bib.hs-hannover.de/frontdoor/index/index/searchtype/collection/id/15/start/8/rows/10/doctypefq/conferenceobject/docId/2375) (2022) 
+[Charbonnier, Jean](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Charbonnier%2C+Jean) ; [Wartena, Christian](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Wartena%2C+Christian)
+Image captions in scientific papers usually are complementary to the images. Consequently, the captions contain many terms that do not refer to concepts visible in the image. We conjecture that it is possible to distinguish between these two types of terms in an image caption by analysing the text only. To examine this, we evaluated different features. The dataset we used to compute tf.idf values, word embeddings and concreteness values contains over 700 000 scientific papers with over 4,6 million images. The evaluation was done with a manually annotated subset of 329 images. Additionally, we trained a support vector machine to predict whether a term is a likely visible or not. We show that concreteness of terms is a very important feature to identify terms in captions and context that refer to concepts visible in images.
+[30th BOBCATSSS Symposium - Book of Abstracts](https://serwiss.bib.hs-hannover.de/frontdoor/index/index/searchtype/collection/id/15/start/9/rows/10/doctypefq/conferenceobject/docId/2312) (2022) 
+[Dille, Nils](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Dille%2C+Nils) ; [Stegemeyer, Merle](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Stegemeyer%2C+Merle) ; [Janus, Leandra](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Janus%2C+Leandra) ; [Witten, Marna](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Witten%2C+Marna) ; [Menzel, Marie-Antoinette](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Menzel%2C+Marie-Antoinette) ; [Arnold, Michelle](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Arnold%2C+Michelle) ; [Eichhorn, Karin](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/authorsearch/author/Eichhorn%2C+Karin)
+Data and Information Science: Book of Abstracts at BOBCATSSS 2022 Hybrid Conference, 23rd - 25th of May 2022, Debrecen. This year marks the 30th anniversary of the BOBCATSSS. The BOBCATSSS is an international, annual symposium designed for librarians and information professionals in a rapidly changing environment. Over the past 30 years, the conference has included exciting topics, great venues, interested guests and engaging presenters. This year we would like to introduce the topics of the many papers presented in the Book of Abstracts for the first time in presence at the University of Debrecen and hybrid. The Book of Abstracts provides an overview of all presentations given at BOBCATSSS. Presentations are listed in alphabetical order by title and include speeches, Pecha Kuchas, posters and workshops. The theme of BOBCATSSS is Data and Information Science. Data and information are the basis for decisions and processes in business, politics and science. Particularly important in the current era of digital transformation. This is exactly where this year's subthemes come in. They deal with data science, openness as well as institutional roles.
+  * **1** bis **10**
+  * [](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/10/rows/10/doctypefq/conferenceobject "Nächste Seite")
+  * [](https://serwiss.bib.hs-hannover.de/solrsearch/index/search/searchtype/collection/id/15/start/30/rows/10/doctypefq/conferenceobject "Letzte Seite")
+
+
