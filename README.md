@@ -236,9 +236,10 @@ Zusätzlich bewertet ein gemeinsamer RAG-Filter jede neu entdeckte URL, bevor si
 - der englische Bereich unter `/en` auf allen HsH-Subdomains
 - Medien-Dateien wie Bilder, Audio und Video
 - technische Assets wie CSS/JS/Archive
-- nicht-oeffentliche App-/Login-Bereiche wie `moodle.hs-hannover.de` sowie Auth-Pfade (`/login`, `/logout`, `/shibboleth`, `/saml`, `/oauth`)
+- nicht-oeffentliche App-/Login-Bereiche wie `moodle.hs-hannover.de` und `intranet.hs-hannover.de` sowie Auth-Pfade (`/login`, `/logout`, `/shibboleth`, `/saml`, `/oauth`)
 - `fileadmin/_processed_`-Assets
 - Office-Dokumente ohne Ingest-Support (`.docx`, `.pptx`, `.xlsx`, ...)
+- offensichtlich kaputte URLs mit rohen Markdown-/Junk-Zeichen wie `*` oder `|`
 - bekannte Backend-/Interndomains wie `serwiss.bib.hs-hannover.de` und `typo3backend-live.hs-hannover.de`
 
 Jede Entscheidung wird in `data/url_decisions.db` gespeichert.
@@ -429,8 +430,9 @@ Zusätzlich:
 Zentrale Bewertungslogik fuer `main.py` und `resume_crawler.py`.
 
 - normalisiert URLs
-- blockiert klar unnuetze RAG-Ziele wie `/en`-Bereiche auf allen HsH-Hosts, Moodle-/Auth-Pfade, Medien-Dateien, technische Assets, `_processed_`-Dateien und bekannte Backend-Domains
+- blockiert klar unnuetze RAG-Ziele wie `/en`-Bereiche auf allen HsH-Hosts, Moodle-/Intranet-/Auth-Pfade, Medien-Dateien, technische Assets, `_processed_`-Dateien und bekannte Backend-Domains
 - blockiert Office-Dokumente ohne direkten Ingest-Support, damit Crawl-Policy und Pipeline konsistent bleiben
+- blockiert offensichtlich kaputte URLs mit rohen Markdown-/Junk-Zeichen
 - erlaubt standardmaessig oeffentliche HTML-Seiten, PDFs und sonstige oeffentliche Dateien
 - speichert jede Entscheidung in einer kleinen SQLite-Datenbank (`data/url_decisions.db`)
 
@@ -698,8 +700,9 @@ Analysiert alle Markdown-Dateien auf Qualitätsprobleme:
 | `main.py` | `BLOCKED_DOMAINS` | `{serwiss.bib..., typo3backend-live...}` | Geblockte Subdomains |
 | `resume_crawler.py` | `MAX_PAGES` | 40.000 | Erhöhtes Limit |
 | `url_filter.py` | `BLOCKED_DOMAINS` | `{serwiss.bib..., typo3backend-live...}` | Geblockte/technische Subdomains |
-| `url_filter.py` | `BLOCKED_APP_HOSTS` | `{moodle.hs-hannover.de}` | Nicht-oeffentliche App-Hosts |
+| `url_filter.py` | `BLOCKED_APP_HOSTS` | `{moodle.hs-hannover.de, intranet.hs-hannover.de}` | Nicht-oeffentliche App-Hosts |
 | `url_filter.py` | `BLOCKED_AUTH_PATH_MARKERS` | `("/login", "/logout", ...)` | Auth-/Login-Pfade |
+| `url_filter.py` | `BROKEN_URL_MARKERS` | `("*", "|", ...)` | Kaputte/artefaktbehaftete URLs blockieren |
 | `url_filter.py` | `DECISION_DB_PATH` | `data/url_decisions.db` | SQLite-Datei fuer URL-Entscheidungen |
 | `hpc_vectorizer.py` | `CHUNK_SIZE` | 1.000 | Max. Chunk-Zeichen |
 | `hpc_vectorizer.py` | `CHUNK_OVERLAP` | 200 | Überlappung |

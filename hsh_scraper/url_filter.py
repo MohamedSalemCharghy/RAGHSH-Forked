@@ -26,6 +26,7 @@ DECISION_DB_PATH = Path(__file__).parent / "data" / "url_decisions.db"
 ENGLISH_SECTION_PREFIX = "/en"
 PROCESSED_ASSET_MARKER = "/fileadmin/_processed_/"
 BLOCKED_APP_HOSTS = {
+    "intranet.hs-hannover.de",
     "moodle.hs-hannover.de",
 }
 BLOCKED_AUTH_PATH_MARKERS = (
@@ -35,6 +36,7 @@ BLOCKED_AUTH_PATH_MARKERS = (
     "/saml",
     "/oauth",
 )
+BROKEN_URL_MARKERS = ("*", "|", "<", ">", "{", "}", '"')
 
 MEDIA_EXTENSIONS = {
     ".jpg",
@@ -181,6 +183,9 @@ def evaluate_rag_url(url: str) -> UrlDecision:
 
     if host in BLOCKED_APP_HOSTS:
         return UrlDecision(url, normalized, "block", "blockiert_nicht_oeffentliche_app")
+
+    if any(marker in normalized for marker in BROKEN_URL_MARKERS):
+        return UrlDecision(url, normalized, "block", "blockiert_vermutlich_kaputte_url")
 
     if path_lower == ENGLISH_SECTION_PREFIX or path_lower.startswith(
         ENGLISH_SECTION_PREFIX + "/"
