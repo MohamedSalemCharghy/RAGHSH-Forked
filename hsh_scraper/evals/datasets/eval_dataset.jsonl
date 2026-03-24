@@ -1,0 +1,3 @@
+{"id":"q001","category":"bewerbung","question":"Wie beantrage ich eine Beurlaubung?","reference_answer":"Expected answer here.","required_facts":["fact 1","fact 2"]}
+{"id":"q002","category":"bibliothek","question":"Welche Services bietet die Bibliothek an?","reference_answer":"Expected answer here.","required_facts":["fact 1"]}
+{"id":"q003","category":"studium","question":"Wo finde ich Informationen zu Bewerbungsfristen?","reference_answer":"Expected answer here.","required_facts":["fact 1","fact 2"]}
