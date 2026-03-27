@@ -341,7 +341,10 @@ def main() -> None:
     reranker = None
     if USE_RERANKER:
         try:
-            from fastembed import TextCrossEncoder
+            try:
+                from fastembed import TextCrossEncoder
+            except ImportError:
+                from fastembed.rerank.cross_encoder import TextCrossEncoder
             print(f"Lade Reranker '{RERANKER_MODEL}'…")
             reranker = TextCrossEncoder(model_name=RERANKER_MODEL)
         except Exception as exc:
