@@ -73,6 +73,8 @@ Nach der RRF-Fusion werden die Ergebnisse einem **Cross-Encoder-Reranker** über
 
 Texte werden in Chunks aufgeteilt, die an Grenzen „abgeschnitten" werden können. RAGHSH lädt für die Top-3-Treffer automatisch die benachbarten Chunks (vorheriger und nachfolgender) nach und hängt sie an den Kerntext an — damit gehen keine Informationen an Chunk-Grenzen verloren.
 
+Zusätzlich gibt es eine **begrenzte zweite Retrieval-Runde**, wenn der erste Kontext erkennbar unvollständig ist. Dann fordert der Chatbot gezielt mehr Kontext an, z.B. Nachbar-Chunks, einen ganzen Abschnitt oder eine zweite Suche für eine fehlende Vergleichsseite. So bleibt der Standard-Kontext klein, ohne bei Regelwerken, Abkürzungen oder Vergleichsfragen vorschnell zu halluzinieren.
+
 ---
 
 ## Systemübersicht
@@ -82,9 +84,17 @@ Phase 1: Datensammlung
   main.py / resume_crawler.py  →  data/ingested/*.md
   (Web-Spider: HTML + PDF → Markdown mit YAML-Header)
 
+Phase 1b: Qualitätsprüfung
+  check_quality.py  →  Audit des Rohkorpus
+  (bewertet Dateien, zeigt Sprache, Score und Problemgruende)
+
+Phase 1c: Kuratierung und Organisation
+  clean_corpus.py  →  data/curated/*.md + data/curated_report.json
+  (entfernt schlechte Links/Boilerplate, markiert Sprache, Gruppen, Topics)
+
 Phase 2a: Vektorisierung auf dem HPC-Cluster  [empfohlen für große Datenmengen]
   hpc_vectorizer.py  →  hsh_vectors.parquet
-  (Dense + BM25 Sparse Vectors, kein Qdrant nötig)
+  (Dense + BM25 Sparse Vectors; bevorzugt data/curated, faellt sonst auf data/ingested zurueck)
 
 Phase 2b: Sparse-Anreicherung lokal  [Fallback für ältere Parquet-Dateien]
   enrich_sparse.py  →  hsh_vectors_enriched.parquet
@@ -103,8 +113,9 @@ Phase 5b: CLI-Chatbot
   hsh_chatbot.py  →  Interaktiver Terminal-Chatbot
 
 Hilfsprogramme:
-  check_quality.py  →  Qualitätsprüfung der Markdown-Dateien
-  delete_qdrant.py  →  Collection zurücksetzen (nach Schema-Änderungen)
+  corpus_quality.py  →  gemeinsame Bewertungs-/Kuratierungslogik
+  check_quality.py   →  read-only Qualitätsprüfung der Markdown-Dateien
+  delete_qdrant.py   →  Collection zurücksetzen (nach Schema-Änderungen)
 ```
 
 ---
@@ -119,14 +130,18 @@ RAGHSH/
     ├── main.py                      # Phase 1: Web-Spider (BFS-Crawler)
     ├── resume_crawler.py            # Phase 1b: Spider fortsetzen / Lücken schließen
     ├── url_filter.py                # Gemeinsame RAG-URL-Filterung + SQLite-Ablage
+    ├── crawl_helpers.py             # Gemeinsame Crawl-Utilities (Sitemaps, Quality Gates, Reporting)
+    ├── corpus_quality.py            # Geteilte Quality-/Cleaning-Logik für Roh- und Kurationskorpus
+    ├── clean_corpus.py              # Phase 1c: Rohkorpus bereinigen und organisieren
     ├── hpc_vectorizer.py            # Phase 2a: HPC-Vektorisierung (Dense + BM25 → Parquet)
     ├── enrich_sparse.py             # Phase 2b: BM25-Spalten lokal hinzufügen (Fallback)
     ├── local_importer.py            # Phase 3: Parquet → Qdrant
     ├── hybrid_search.py             # Phase 4: Hybrid-Suche (Dense + BM25 + Reranker)
+    ├── rag_followup.py              # Bedarfsorientierte zweite Retrieval-Runde
     ├── hsh_web_app.py               # Phase 5a: Streamlit Web-App
     ├── hsh_chatbot.py               # Phase 5b: CLI-Chatbot
     ├── delete_qdrant.py             # Hilfsprogramm: Collection löschen und neu anlegen
-    ├── check_quality.py             # Hilfsprogramm: Qualitätsprüfung der MD-Dateien
+    ├── check_quality.py             # Hilfsprogramm: Read-only Qualitätsprüfung der MD-Dateien
     ├── ingest_to_qdrant.py          # Ältere All-in-One Vektorisierung (superseded)
     ├── requirements.txt             # Python-Abhängigkeiten
     ├── .env                         # API-Schlüssel (nicht im Git!)
@@ -135,9 +150,11 @@ RAGHSH/
     ├── hsh_vectors_enriched.parquet # Optional: lokal angereicherte Parquet-Datei
     └── data/
         ├── url_decisions.db         # SQLite-Historie der URL-Entscheidungen
-        └── ingested/                # Gescrapte Seiten als Markdown-Dateien
-            ├── YYYY-MM-DD_slug.md
-            └── ...
+        ├── curated/                 # Bereinigtes Korpus für die Vektorisierung
+        │   └── YYYY-MM-DD_slug.md
+        ├── curated_report.json      # Report der Kuratierungsentscheidung pro Datei
+        └── ingested/                # Rohkorpus aus dem Crawl
+            └── YYYY-MM-DD_slug.md
 ```
 
 ---
@@ -270,14 +287,47 @@ Die SQLite-Datei `data/url_decisions.db` wird bei Bedarf automatisch angelegt un
 python check_quality.py
 ```
 
-Gibt eine Tabelle aller Markdown-Dateien aus und listet Löschvorschläge:
+Gibt eine Tabelle aller Roh-Markdown-Dateien aus und nutzt dieselben Regeln wie die spätere Kuratierung:
 
 ```
-Filename                          Words   Tables  Type    Quality
-─────────────────────────────────────────────────────────────────
-2026-03-14_index.md               1.234        3  html    OK
-2026-03-14_fehlerseite.md             8        0  html    LÖSCHEN
-  → Zu wenig Text: 8 Wörter (Minimum HTML: 30)
+Filename                          Words  Type    Lang   Score  Quality
+───────────────────────────────────────────────────────────────────────
+2026-03-14_index.md               1.234  html    de        96  OK
+2026-03-14_preview-page.md           52  html    mixed     58  PRUEFEN
+2026-03-14_exchange-info.md         410  html    en        25  PRUEFEN
+```
+
+Es werden u.a. bewertet:
+
+- Mindesttextmenge für HTML/PDF
+- Fehlerseitenmuster
+- sprachlich gemischte oder englische Seiten
+- Preview-/Backend-Links im Body
+- ältere Duplikate desselben URL-Slugs
+
+### Phase 1c: Korpus bereinigen und organisieren
+
+```bash
+python clean_corpus.py
+```
+
+`clean_corpus.py` liest `data/ingested/`, schreibt ein bereinigtes Korpus nach `data/curated/` und erzeugt einen JSON-Report in `data/curated_report.json`.
+
+Bereinigungen und Anreicherungen:
+
+- entfernt geblockte Preview-/Backend-Links direkt aus dem Markdown-Body
+- normalisiert relative Links zu offiziellen absoluten URLs
+- entfernt typische Boilerplate-Zeilen wie Teilen-/Scroll-Hinweise
+- verwirft englische Seiten standardmäßig
+- ergänzt Metadaten wie `language`, `quality_score`, `document_kind`, `source_family`, `document_group`, `topic_tags`
+
+Optional mit eigenen Pfaden:
+
+```bash
+python clean_corpus.py \
+  --input-dir data/ingested \
+  --output-dir data/curated \
+  --report-file data/curated_report.json
 ```
 
 ### Phase 2a: Vektorisierung auf dem HPC-Cluster (empfohlen)
@@ -290,11 +340,14 @@ python hpc_vectorizer.py   →  hsh_vectors.parquet
 scp hsh_vectors.parquet user@localhost:~/RAGHSH/hsh_scraper/
 ```
 
-`hpc_vectorizer.py` erzeugt **beide** Vektortypen in einem Durchlauf:
+`hpc_vectorizer.py` erzeugt **beide** Vektortypen in einem Durchlauf und verwendet automatisch `data/curated/`, wenn dort bereits bereinigte Markdown-Dateien vorliegen. Falls nicht, fällt das Skript auf `data/ingested/` zurück.
+
+Es erzeugt:
 - Dense Embeddings (GPU-beschleunigt, Batch-Größe 64)
 - BM25 Sparse Embeddings (CPU-only, Batch-Größe 256)
+- Chunk-Metadaten für spätere Filterung und Gruppierung im Retrieval
 
-Output: `hsh_vectors.parquet` (komprimiert mit ZSTD, enthält alle 13 Spalten)
+Output: `hsh_vectors.parquet` (komprimiert mit ZSTD, enthält Dense-, Sparse- und Qualitätsmetadaten)
 
 ### Phase 2b: Sparse-Anreicherung lokal (Fallback)
 
@@ -360,6 +413,7 @@ Die Web-App bietet:
 - **Fakultätsfilter**: Ergebnisse werden auf die gewählte Fakultät + fakultätsübergreifende Seiten (ohne Fakultätszuordnung) eingeschränkt
 - **Streaming-Antworten** mit Quellenangaben und optionalem Denkprozess-Expander
 - **Veralterungswarnung**: Falls eine Quelle älter als 6 Monate ist, empfiehlt das System Nachprüfung
+- **Follow-up Retrieval**: bei unvollständigem Erstkontext kann gezielt weiterer Kontext nachgeladen werden
 
 ### Phase 5b: CLI-Chatbot
 
@@ -397,12 +451,15 @@ Crawlt die gesamte HsH-Website per **Breadth-First-Search (BFS)**.
 | `ALLOWED_DOMAIN` | `hs-hannover.de` | Nur diese Domain und ihre Subdomains |
 | `BLOCKED_DOMAINS` | `{"serwiss.bib.hs-hannover.de", "typo3backend-live.hs-hannover.de"}` | Geblockte Subdomains |
 | `MAX_AGE_DAYS` | `7` | Cache-Alter in Tagen |
-| `RATE_LIMIT_SECONDS` | `2` | Pause zwischen Requests |
+| `RATE_LIMIT_SECONDS` | `0.5` | Pause zwischen Requests |
 
 - **HTML**: Crawl4AI (Playwright) mit CSS-Selektor `main, .content-main, #content, .frame-default`; boilerplate (Navigation, Header, Footer, Cookie-Banner) wird ausgeblendet
 - **PDF**: httpx-Download + pymupdf4llm-Konvertierung
 - **Dateiformat**: `YYYY-MM-DD_url-slug.md` mit YAML-Frontmatter (`source_url`, `title`, `crawl_date`, `content_type`)
 - **RAG-Filter**: Neue Links werden vor dem Queueing durch `url_filter.py` bewertet und in `data/url_decisions.db` protokolliert
+- **Sitemap-Seeding**: erkannte `sitemap.xml`-Dateien werden zusätzlich als Seed-Quelle genutzt
+- **Soft-Priorisierung**: URLs werden als `allow_high_value`, `allow_low_value` oder `block` klassifiziert; High-Value-Links werden bevorzugt gecrawlt
+- **Post-Crawl-Quality-Gate**: sehr kurze, nav-lastige oder offensichtliche Junk-Seiten werden nach der Extraktion noch verworfen
 
 ---
 
@@ -429,18 +486,18 @@ Zusätzlich:
 
 Zentrale Bewertungslogik fuer `main.py` und `resume_crawler.py`.
 
-- normalisiert URLs
-- blockiert klar unnuetze RAG-Ziele wie `/en`-Bereiche auf allen HsH-Hosts, Moodle-/Intranet-/Auth-Pfade, Medien-Dateien, technische Assets, `_processed_`-Dateien und bekannte Backend-Domains
-- blockiert Office-Dokumente ohne direkten Ingest-Support, damit Crawl-Policy und Pipeline konsistent bleiben
-- blockiert offensichtlich kaputte URLs mit rohen Markdown-/Junk-Zeichen
-- erlaubt standardmaessig oeffentliche HTML-Seiten, PDFs und sonstige oeffentliche Dateien
-- speichert jede Entscheidung in einer kleinen SQLite-Datenbank (`data/url_decisions.db`)
+- normalisiert URLs strenger und entfernt Tracking-/Print-/Fragment-Varianten
+- blockiert klar unnuetze RAG-Ziele wie Preview-/Backend-/Dev-Hosts, `/en`-Bereiche, Moodle-/Intranet-/Auth-Pfade, Medien-Dateien, technische Assets, `_processed_`-Dateien und bekannte Backend-Domains
+- blockiert Low-Value-Pfade wie News-Archive, Galerie-/Tag-/Promo-Seiten deutlich aggressiver
+- bewertet erlaubte Ziele als `allow_high_value` oder `allow_low_value`, damit Studium-/Bewerbungs-/Pruefungsseiten frueher gecrawlt werden
+- verwendet zusaetzliche PDF-Heuristiken, um z.B. Ordnungen/Formulare/Faqs zu bevorzugen
+- speichert jede Entscheidung in einer kleinen SQLite-Datenbank (`data/url_decisions.db`) inklusive Grund
 
 ---
 
 ### `hpc_vectorizer.py` — HPC-Vektorisierung
 
-Erzeugt Dense + BM25 Sparse Vectors aus Markdown-Dateien und speichert sie als Parquet.
+Erzeugt Dense + BM25 Sparse Vectors aus Markdown-Dateien und speichert sie als Parquet. Wenn `data/curated/` vorhanden und nicht leer ist, wird dieses bereinigte Korpus bevorzugt verarbeitet; andernfalls dient `data/ingested/` als Fallback. Alternativ kann per `RAG_SOURCE_DIR=/pfad/...` ein eigenes Quellverzeichnis gesetzt werden.
 
 | Parameter | Standard | Beschreibung |
 |---|---|---|
@@ -456,7 +513,7 @@ Erzeugt Dense + BM25 Sparse Vectors aus Markdown-Dateien und speichert sie als P
 1. `MarkdownHeaderTextSplitter` — teilt an `#`, `##`, `###`; Überschriften-Hierarchie wird als `section_heading`-Metadatum (`H1 > H2 > H3`) bewahrt
 2. `RecursiveCharacterTextSplitter` — teilt zu große Abschnitte weiter
 
-**Parquet-Schema (13 Spalten):**
+**Parquet-Schema (19 Spalten):**
 
 | Spalte | Typ | Beschreibung |
 |---|---|---|
@@ -467,6 +524,12 @@ Erzeugt Dense + BM25 Sparse Vectors aus Markdown-Dateien und speichert sie als P
 | `crawl_date` | string | ISO-8601-Datum |
 | `content_type` | string | `html` oder `pdf` |
 | `faculty` | string | Aus URL extrahiert: `/f1/`–`/f5/`, Subdomains |
+| `language` | string | Sprachklassifikation aus der Kuratierung (`de`, `en`, `mixed`, `unknown`) |
+| `quality_score` | string | Qualitätswert aus `clean_corpus.py` |
+| `document_kind` | string | Z.B. `regulation`, `module_handbook`, `contact_service` |
+| `source_family` | string | Grobe Zugehörigkeit, z.B. `faculty_4`, `internationales` |
+| `document_group` | string | Feiner Gruppenschlüssel für zusammengehörige Dokumente |
+| `topic_tags` | string | Mit `|` getrennte Themen-Tags, z.B. `bewerbung|rueckmeldung` |
 | `section_heading` | string | Überschriften-Breadcrumb |
 | `text` | string | Volltext des Chunks |
 | `chunk_index` | int32 | Position im Dokument |
@@ -512,12 +575,15 @@ Lädt die Parquet-Datei in Qdrant. Erkennt automatisch:
 - `faculty` — Keyword-Index (Fakultätsfilter)
 - `chunk_index` — Integer-Index (Context Augmentation)
 - `source_url` — Keyword-Index (Context Augmentation + Dedup)
+- `document_kind` — Keyword-Index (Regelwerk/Formular/FAQ gezielt filterbar)
+- `document_group` — Keyword-Index (verwandte Dokumente gruppiert nutzbar)
+- `language` — Keyword-Index (deutsch/englisch trennbar)
 
 ---
 
 ### `hybrid_search.py` — Hybrid-Suchpipeline
 
-6-stufige Suchpipeline mit Qdrant-nativer Fusion.
+Hybrid-Suchpipeline mit Qdrant-nativer Fusion, Reranking und Nachbar-Augmentation.
 
 | Parameter | Standard | Beschreibung |
 |---|---|---|
@@ -595,6 +661,8 @@ Zentrale Einrichtungen (ohne Fakultätszuordnung) erscheinen immer — unabhäng
 
 Dynamische Modellauswahl: Beim Start werden alle verfügbaren Modelle von der GWDG-API abgefragt. Reasoning-Modelle (DeepSeek R1 o.ä.) zeigen ihren Denkprozess in einem separaten `[Thinking]`-Block.
 
+Zusätzlich nutzt der Chatbot eine **begrenzte Follow-up-Retrieval-Runde**: Wenn der erste Kontext für eine Definition, einen Vergleich oder einen Regelwerksausschnitt unvollständig ist, kann `rag_followup.py` gezielt mehr Nachbar-Chunks, einen Abschnitt oder eine zweite Suche anfordern. Für aktuelle Fragen wie „heute" wird dagegen bewusst nicht endlos nachgeladen.
+
 ---
 
 ### `delete_qdrant.py` — Collection zurücksetzen
@@ -615,6 +683,17 @@ Analysiert alle Markdown-Dateien auf Qualitätsprobleme:
 | Mindestwörter (PDF) | 50 |
 | Erkannte Fehlermuster | „404", „Seite nicht gefunden", „Zugriff verweigert", … |
 | Duplikate | Ältere Version desselben URL-Slugs |
+| Sprachheuristik | `de`, `en`, `mixed`, `unknown` |
+| Preview-/Backend-Links im Body | werden als Qualitätsproblem markiert |
+
+### `clean_corpus.py` — Kuratierung des Rohkorpus
+
+Transformiert `data/ingested/` in ein bereinigtes `data/curated/`.
+
+- entfernt geblockte Links und offensichtliche Boilerplate
+- ergänzt Qualitäts- und Gruppen-Metadaten
+- verwirft problematische Dateien vor der Vektorisierung
+- schreibt mit `data/curated_report.json` einen maschinenlesbaren Prüfbericht pro Datei
 
 ---
 
@@ -627,7 +706,7 @@ Analysiert alle Markdown-Dateien auf Qualitätsprobleme:
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│  hybrid_search.py — 6-stufige Suchpipeline                           │
+│  hybrid_search.py — Hybrid-Suche + Reranking                         │
 │                                                                      │
 │  Anfrage → Dense-Embedding (Jina v3, 1024-dim)                       │
 │  Anfrage → BM25-Sparse-Embedding (Qdrant/bm25)                       │
@@ -641,7 +720,7 @@ Analysiert alle Markdown-Dateien auf Qualitätsprobleme:
 │              Qdrant-native RRF-Fusion (ein Roundtrip)                │
 │                                │                                     │
 │                                ▼                                     │
-│              URL-Filter (serwiss.bib.* entfernen)                    │
+│              URL-/Host-Filter und Low-Value-Filter                   │
 │                                │                                     │
 │                                ▼                                     │
 │              URL-Deduplizierung (max. 2 Chunks/URL)                  │
@@ -670,6 +749,15 @@ Analysiert alle Markdown-Dateien auf Qualitätsprobleme:
 │            Frage: {nutzerfrage}                                      │
 └─────────────────────────────────┬────────────────────────────────────┘
                                   │
+                                  │  optional bei unvollstaendigem Kontext
+                                  ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  rag_followup.py — gezielte zweite Retrieval-Runde                  │
+│  • neighbour_chunks / full_section / same_group_documents / new_search│
+│  • maximal eine zusaetzliche Runde                                   │
+│  • keine Endlosschleifen fuer aktuelle „heute"-Fragen                │
+└─────────────────────────────────┬────────────────────────────────────┘
+                                  │
                                   ▼
 ┌──────────────────────────────────────────────────────────────────────┐
 │  GWDG ChatAI API (OpenAI-kompatibel)                                 │
@@ -696,7 +784,7 @@ Analysiert alle Markdown-Dateien auf Qualitätsprobleme:
 |--------|-----------|----------|-----------|
 | `main.py` | `MAX_PAGES` | 10.000 | Max. gecrawlte Seiten |
 | `main.py` | `MAX_AGE_DAYS` | 7 | Cache-TTL in Tagen |
-| `main.py` | `RATE_LIMIT_SECONDS` | 2 | Pause zwischen Requests |
+| `main.py` | `RATE_LIMIT_SECONDS` | 0.5 | Pause zwischen Requests |
 | `main.py` | `BLOCKED_DOMAINS` | `{serwiss.bib..., typo3backend-live...}` | Geblockte Subdomains |
 | `resume_crawler.py` | `MAX_PAGES` | 40.000 | Erhöhtes Limit |
 | `url_filter.py` | `BLOCKED_DOMAINS` | `{serwiss.bib..., typo3backend-live...}` | Geblockte/technische Subdomains |
@@ -704,11 +792,13 @@ Analysiert alle Markdown-Dateien auf Qualitätsprobleme:
 | `url_filter.py` | `BLOCKED_AUTH_PATH_MARKERS` | `("/login", "/logout", ...)` | Auth-/Login-Pfade |
 | `url_filter.py` | `BROKEN_URL_MARKERS` | `("*", "|", ...)` | Kaputte/artefaktbehaftete URLs blockieren |
 | `url_filter.py` | `DECISION_DB_PATH` | `data/url_decisions.db` | SQLite-Datei fuer URL-Entscheidungen |
+| `clean_corpus.py` | `--keep-english` | `False` | Englischsprachige Dateien standardmaessig verwerfen |
 | `hpc_vectorizer.py` | `CHUNK_SIZE` | 1.000 | Max. Chunk-Zeichen |
 | `hpc_vectorizer.py` | `CHUNK_OVERLAP` | 200 | Überlappung |
 | `hpc_vectorizer.py` | `DENSE_BATCH_SIZE` | 64 | GPU-Batch |
 | `hpc_vectorizer.py` | `SPARSE_BATCH_SIZE` | 256 | CPU-Batch |
 | `hpc_vectorizer.py` | `RESUME_FROM_FILE` | 1 | Neustart-Dateinummer |
+| `hpc_vectorizer.py` | `RAG_SOURCE_DIR` | automatisch | Bevorzugt `data/curated/`, sonst `data/ingested/` |
 | `local_importer.py` | `UPLOAD_BATCH` | 256 | Punkte pro Upsert |
 | `local_importer.py` | `RESUME_FROM_ROW` | 0 | Neustart-Zeilenindex |
 | `hybrid_search.py` | `CANDIDATE_LIMIT` | 100 | Kandidaten pro Arm |

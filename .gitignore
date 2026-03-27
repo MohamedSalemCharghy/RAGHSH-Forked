@@ -4,3 +4,8 @@ __pycache__/
 .venv/
 qdrant_data/
 hsh_scraper/data/ingested/
+hsh_scraper/data/curated/
+hsh_scraper/data/curated_report.json
+hsh_scraper/data/ingested_backup*.tar.gz
+hsh_scraper/data/ingested_backup*.tar.xz
+hsh_scraper/hsh_vectors.parquet

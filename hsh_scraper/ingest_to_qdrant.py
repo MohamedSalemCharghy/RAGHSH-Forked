@@ -74,6 +74,7 @@ Abhängigkeiten: qdrant-client, fastembed, langchain-text-splitters
 
 import gc
 import logging
+import os
 import sys
 import uuid
 from pathlib import Path
@@ -86,7 +87,14 @@ from qdrant_client import QdrantClient, models
 # Configuration
 # ---------------------------------------------------------------------------
 
-INGESTED_DIR = Path(__file__).parent / "data" / "ingested"
+RAW_INGESTED_DIR = Path(__file__).parent / "data" / "ingested"
+CURATED_DIR = Path(__file__).parent / "data" / "curated"
+INGESTED_DIR = Path(
+    os.getenv(
+        "RAG_SOURCE_DIR",
+        CURATED_DIR if CURATED_DIR.exists() and any(CURATED_DIR.glob("*.md")) else RAW_INGESTED_DIR,
+    )
+)
 QDRANT_URL = "http://localhost:6333"
 COLLECTION_NAME = "hsh_knowledge"
 
@@ -158,6 +166,25 @@ def parse_markdown_file(path: Path) -> tuple[dict, str] | None:
     return meta, body
 
 
+def sort_markdown_files(md_files: list[Path]) -> list[Path]:
+    """Sort curated files by semantic grouping before ingest."""
+    sortable: list[tuple[tuple[str, str, str, str], Path]] = []
+    for path in md_files:
+        result = parse_markdown_file(path)
+        if result is None:
+            key = ("zz_unknown", "zz_unknown", "", path.name)
+        else:
+            meta, _ = result
+            key = (
+                meta.get("source_family", "zz_unknown"),
+                meta.get("document_group", "zz_unknown"),
+                meta.get("source_url", ""),
+                path.name,
+            )
+        sortable.append((key, path))
+    return [path for _, path in sorted(sortable, key=lambda item: item[0])]
+
+
 def extract_faculty(url: str) -> str:
     """Extract faculty label from URL path, e.g. '/f4/' → 'Fakultät IV'."""
     lower = url.lower()
@@ -194,6 +221,12 @@ def chunk_document(
         "crawl_date":   meta.get("crawl_date", ""),
         "content_type": meta.get("content_type", "html"),
         "faculty":      extract_faculty(meta.get("source_url", "")),
+        "language":     meta.get("language", ""),
+        "quality_score": meta.get("quality_score", ""),
+        "document_kind": meta.get("document_kind", ""),
+        "source_family": meta.get("source_family", ""),
+        "document_group": meta.get("document_group", ""),
+        "topic_tags":    meta.get("topic_tags", ""),
     }
 
     final_chunks: list[dict] = []
@@ -275,7 +308,7 @@ def main() -> None:
         sys.exit(1)
 
     # ── 2. Scan ingested directory ────────────────────────────────────────
-    md_files = sorted(INGESTED_DIR.glob("*.md"))
+    md_files = sort_markdown_files(list(INGESTED_DIR.glob("*.md")))
     if not md_files:
         logger.error("No .md files found in %s", INGESTED_DIR)
         sys.exit(1)

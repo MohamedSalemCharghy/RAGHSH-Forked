@@ -135,7 +135,24 @@ def ensure_collection(client: QdrantClient) -> None:
             field_name="source_url",
             field_schema=models.KeywordIndexParams(type="keyword"),
         )
-        logger.info("Payload-Indizes angelegt: faculty, chunk_index, source_url")
+        client.create_payload_index(
+            collection_name=COLLECTION_NAME,
+            field_name="document_kind",
+            field_schema=models.KeywordIndexParams(type="keyword"),
+        )
+        client.create_payload_index(
+            collection_name=COLLECTION_NAME,
+            field_name="document_group",
+            field_schema=models.KeywordIndexParams(type="keyword"),
+        )
+        client.create_payload_index(
+            collection_name=COLLECTION_NAME,
+            field_name="language",
+            field_schema=models.KeywordIndexParams(type="keyword"),
+        )
+        logger.info(
+            "Payload-Indizes angelegt: faculty, chunk_index, source_url, document_kind, document_group, language"
+        )
     else:
         logger.info("Collection '%s' existiert bereits — Upsert-Modus", COLLECTION_NAME)
 
@@ -226,6 +243,12 @@ def main() -> None:
         crawl_dates      = batch_dict["crawl_date"]
         content_types    = batch_dict["content_type"]
         faculties        = batch_dict["faculty"]
+        languages        = batch_dict.get("language", [""] * len(ids))
+        quality_scores   = batch_dict.get("quality_score", [""] * len(ids))
+        document_kinds   = batch_dict.get("document_kind", [""] * len(ids))
+        source_families  = batch_dict.get("source_family", [""] * len(ids))
+        document_groups  = batch_dict.get("document_group", [""] * len(ids))
+        topic_tags       = batch_dict.get("topic_tags", [""] * len(ids))
         section_headings = batch_dict["section_heading"]
         texts            = batch_dict["text"]
         chunk_indices    = batch_dict["chunk_index"]
@@ -251,6 +274,12 @@ def main() -> None:
                         "crawl_date":      crawl_dates[i],
                         "content_type":    content_types[i],
                         "faculty":         faculties[i],
+                        "language":        languages[i],
+                        "quality_score":   quality_scores[i],
+                        "document_kind":   document_kinds[i],
+                        "source_family":   source_families[i],
+                        "document_group":  document_groups[i],
+                        "topic_tags":      topic_tags[i],
                         "section_heading": section_headings[i],
                         "text":            texts[i],
                         "chunk_index":     chunk_indices[i],

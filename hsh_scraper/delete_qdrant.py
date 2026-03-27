@@ -92,4 +92,28 @@ client.create_payload_index(
 )
 print("  Keyword-Index 'source_url' angelegt.")
 
+# Keyword-Index auf 'document_kind' für zielgerichtete Filter
+client.create_payload_index(
+    collection_name=COLLECTION_NAME,
+    field_name="document_kind",
+    field_schema=qmodels.KeywordIndexParams(type="keyword"),
+)
+print("  Keyword-Index 'document_kind' angelegt.")
+
+# Keyword-Index auf 'document_group' für gruppierte Nachbarsuche
+client.create_payload_index(
+    collection_name=COLLECTION_NAME,
+    field_name="document_group",
+    field_schema=qmodels.KeywordIndexParams(type="keyword"),
+)
+print("  Keyword-Index 'document_group' angelegt.")
+
+# Keyword-Index auf 'language' für Sprachfilter/Diagnose
+client.create_payload_index(
+    collection_name=COLLECTION_NAME,
+    field_name="language",
+    field_schema=qmodels.KeywordIndexParams(type="keyword"),
+)
+print("  Keyword-Index 'language' angelegt.")
+
 print("Nächster Schritt: python local_importer.py ausführen, um die Datenbank zu befüllen.")

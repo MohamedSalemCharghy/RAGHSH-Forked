@@ -47,6 +47,7 @@ Abhängigkeiten (HPC-VirtualEnv):
 
 import gc
 import logging
+import os
 import sys
 import uuid
 from pathlib import Path
@@ -60,7 +61,14 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharac
 # Konfiguration
 # ---------------------------------------------------------------------------
 
-INGESTED_DIR    = Path(__file__).parent / "data" / "ingested"
+RAW_INGESTED_DIR = Path(__file__).parent / "data" / "ingested"
+CURATED_DIR = Path(__file__).parent / "data" / "curated"
+INGESTED_DIR = Path(
+    os.getenv(
+        "RAG_SOURCE_DIR",
+        CURATED_DIR if CURATED_DIR.exists() and any(CURATED_DIR.glob("*.md")) else RAW_INGESTED_DIR,
+    )
+)
 OUTPUT_FILE     = Path(__file__).parent / "hsh_vectors.parquet"
 
 DENSE_MODEL      = "jinaai/jina-embeddings-v3"
@@ -96,6 +104,12 @@ PARQUET_SCHEMA = pa.schema([
     pa.field("crawl_date",      pa.string()),
     pa.field("content_type",    pa.string()),
     pa.field("faculty",         pa.string()),
+    pa.field("language",        pa.string()),
+    pa.field("quality_score",   pa.string()),
+    pa.field("document_kind",   pa.string()),
+    pa.field("source_family",   pa.string()),
+    pa.field("document_group",  pa.string()),
+    pa.field("topic_tags",      pa.string()),
     pa.field("section_heading", pa.string()),
     pa.field("text",            pa.string()),
     pa.field("chunk_index",     pa.int32()),
@@ -139,6 +153,25 @@ def parse_markdown_file(path: Path) -> tuple[dict, str] | None:
     return meta, body
 
 
+def sort_markdown_files(md_files: list[Path]) -> list[Path]:
+    """Sort curated files by semantic grouping before vectorization."""
+    sortable: list[tuple[tuple[str, str, str, str], Path]] = []
+    for path in md_files:
+        result = parse_markdown_file(path)
+        if result is None:
+            key = ("zz_unknown", "zz_unknown", "", path.name)
+        else:
+            meta, _ = result
+            key = (
+                meta.get("source_family", "zz_unknown"),
+                meta.get("document_group", "zz_unknown"),
+                meta.get("source_url", ""),
+                path.name,
+            )
+        sortable.append((key, path))
+    return [path for _, path in sorted(sortable, key=lambda item: item[0])]
+
+
 def extract_faculty(url: str) -> str:
     """Ermittelt die Fakultätszugehörigkeit aus der URL.
 
@@ -180,6 +213,12 @@ def chunk_document(meta: dict, body: str,
         "crawl_date":   meta.get("crawl_date", ""),
         "content_type": meta.get("content_type", "html"),
         "faculty":      extract_faculty(meta.get("source_url", "")),
+        "language":     meta.get("language", ""),
+        "quality_score": meta.get("quality_score", ""),
+        "document_kind": meta.get("document_kind", ""),
+        "source_family": meta.get("source_family", ""),
+        "document_group": meta.get("document_group", ""),
+        "topic_tags":    meta.get("topic_tags", ""),
     }
 
     final_chunks: list[dict] = []
@@ -230,6 +269,12 @@ def chunks_to_record_batch(chunks: list[dict],
             "crawl_date":      [c["crawl_date"]      for c in chunks],
             "content_type":    [c["content_type"]    for c in chunks],
             "faculty":         [c["faculty"]         for c in chunks],
+            "language":        [c["language"]        for c in chunks],
+            "quality_score":   [c["quality_score"]   for c in chunks],
+            "document_kind":   [c["document_kind"]   for c in chunks],
+            "source_family":   [c["source_family"]   for c in chunks],
+            "document_group":  [c["document_group"]  for c in chunks],
+            "topic_tags":      [c["topic_tags"]      for c in chunks],
             "section_heading": [c["section_heading"] for c in chunks],
             "text":            [c["text"]            for c in chunks],
             "chunk_index":     [c["chunk_index"]     for c in chunks],
@@ -248,7 +293,7 @@ def chunks_to_record_batch(chunks: list[dict],
 
 def main() -> None:
     # ── 1. Dateien einlesen ───────────────────────────────────────────────
-    md_files = sorted(INGESTED_DIR.glob("*.md"))
+    md_files = sort_markdown_files(list(INGESTED_DIR.glob("*.md")))
     if not md_files:
         logger.error("Keine .md-Dateien gefunden in %s", INGESTED_DIR)
         sys.exit(1)
