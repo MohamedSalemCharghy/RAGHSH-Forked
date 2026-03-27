@@ -28,6 +28,7 @@ from hybrid_search import (
     embed_query_sparse,
     perform_hybrid_search,
 )
+from rag_followup import maybe_expand_results_with_followup
 
 # ---------------------------------------------------------------------------
 # Konfiguration
@@ -341,6 +342,20 @@ def render_sources(results: list[dict]) -> None:
                 st.divider()
 
 
+def render_followup_note(plan: dict | None) -> None:
+    if not plan or plan.get("mode") != "need_more_context":
+        return
+    action = plan.get("requested_action", "")
+    reason = plan.get("reason", "")
+    source = plan.get("target_source_url", "")
+    parts = [f"Kontext wurde gezielt erweitert: {action}"]
+    if reason:
+        parts.append(f"Grund: {reason}")
+    if source:
+        parts.append(f"Quelle: {source}")
+    st.caption(" · ".join(parts))
+
+
 # ---------------------------------------------------------------------------
 # Sidebar
 # ---------------------------------------------------------------------------
@@ -409,6 +424,8 @@ def main() -> None:
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
+            if msg.get("followup_plan"):
+                render_followup_note(msg["followup_plan"])
             if msg.get("sources"):
                 render_sources(msg["sources"])
 
@@ -429,6 +446,19 @@ def main() -> None:
         with st.chat_message("assistant"):
             st.warning("Keine passenden Dokumente in der Wissensdatenbank gefunden.")
         return
+
+    with st.spinner("Prüfe, ob weiterer Kontext benötigt wird …"):
+        results, followup_plan = maybe_expand_results_with_followup(
+            openai_client,
+            modell,
+            qdrant,
+            dense_embedder,
+            sparse_embedder,
+            question,
+            results,
+            reranker=reranker,
+            top_k=RAG_TOP_K,
+        )
 
     context = build_rag_context(results)
 
@@ -460,6 +490,7 @@ def main() -> None:
     # ── Streaming-Antwort ─────────────────────────────────────────────────
     with st.chat_message("assistant"):
         try:
+            render_followup_note(followup_plan)
             answer = stream_response(openai_client, modell, llm_messages)
         except Exception as exc:
             st.error(f"Fehler bei der API-Anfrage: {exc}")
@@ -469,6 +500,7 @@ def main() -> None:
     st.session_state.messages.append({
         "role":    "assistant",
         "content": answer,
+        "followup_plan": followup_plan,
         "sources": results,
     })
 

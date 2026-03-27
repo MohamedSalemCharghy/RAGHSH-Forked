@@ -13,13 +13,34 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, urlencode, urlparse
 
 ALLOWED_DOMAIN = "hs-hannover.de"
 BLOCKED_DOMAINS = {
     "serwiss.bib.hs-hannover.de",
     "typo3backend-live.hs-hannover.de",
 }
+CANONICAL_HOST_MAP = {
+    "hs-hannover.de": "www.hs-hannover.de",
+}
+BLOCKED_HOST_SEGMENTS = {
+    "backend",
+    "preview",
+    "staging",
+    "test",
+    "wp",
+}
+BLOCKED_HOST_FRAGMENT_MARKERS = (
+    "backend",
+    "-preview",
+    ".preview",
+    "-staging",
+    ".staging",
+    "-test",
+    ".test",
+    "-dev",
+    ".dev",
+)
 
 DECISION_DB_PATH = Path(__file__).parent / "data" / "url_decisions.db"
 
@@ -37,6 +58,112 @@ BLOCKED_AUTH_PATH_MARKERS = (
     "/oauth",
 )
 BROKEN_URL_MARKERS = ("*", "|", "<", ">", "{", "}", '"')
+INDEX_FILENAMES = {
+    "index.html",
+    "index.htm",
+    "index.php",
+    "default.aspx",
+    "default.asp",
+}
+NOISY_QUERY_PARAMS = {
+    "cHash",
+    "fbclid",
+    "gclid",
+    "mc_cid",
+    "mc_eid",
+    "pk_campaign",
+    "pk_kwd",
+    "pk_medium",
+    "pk_source",
+    "print",
+    "ref",
+    "refsrc",
+    "share",
+    "source",
+    "tracking",
+    "utm_campaign",
+    "utm_content",
+    "utm_id",
+    "utm_medium",
+    "utm_source",
+    "utm_term",
+}
+BLOCKED_PATH_MARKERS = (
+    "/aktuelles/",
+    "/news/",
+    "/neuigkeiten/",
+    "/veranstaltungen/",
+    "/veranstaltung/",
+    "/events/",
+    "/event/",
+    "/galerie/",
+    "/gallery/",
+    "/blog/",
+    "/blogs/",
+    "/tag/",
+    "/tags/",
+    "/category/",
+    "/kategorie/",
+    "/author/",
+    "/feed",
+    "/rss",
+)
+LOW_VALUE_PATH_MARKERS = (
+    "/standort-oeffnungszeiten",
+    "/oeffnungszeiten",
+    "/anfahrt",
+    "/lageplan",
+    "/impressum",
+    "/datenschutz",
+)
+HIGH_VALUE_KEYWORDS = {
+    "antrag": 5,
+    "bewerbung": 6,
+    "campuscard": 4,
+    "faq": 3,
+    "immatrik": 6,
+    "international": 4,
+    "kontakt": 3,
+    "modulhandbuch": 6,
+    "ordnung": 7,
+    "pruef": 6,
+    "rueckmeldung": 6,
+    "satzung": 7,
+    "semestertermine": 6,
+    "studium": 4,
+    "studiengang": 4,
+    "verkuendungsblatt": 7,
+    "zulassung": 6,
+}
+LOW_VALUE_KEYWORDS = {
+    "broschuere": -4,
+    "broschueren": -4,
+    "flyer": -4,
+    "galerie": -5,
+    "gallery": -5,
+    "news": -4,
+    "oeffnungszeiten": -3,
+    "poster": -5,
+    "plakat": -5,
+    "stundenplan": -3,
+    "veranstaltung": -5,
+    "veranstaltungen": -5,
+}
+PREFERRED_PDF_KEYWORDS = {
+    "antrag",
+    "faq",
+    "modulhandbuch",
+    "ordnung",
+    "satzung",
+    "verkuendungsblatt",
+}
+DEPRIORITIZED_PDF_KEYWORDS = {
+    "broschuere",
+    "broschueren",
+    "flyer",
+    "poster",
+    "stundenplan",
+}
 
 MEDIA_EXTENSIONS = {
     ".jpg",
@@ -105,10 +232,19 @@ class UrlDecision:
     normalized_url: str
     decision: str
     reason: str
+    priority_score: int = 0
 
     @property
     def is_allowed(self) -> bool:
-        return self.decision == "allow"
+        return self.decision.startswith("allow")
+
+    @property
+    def is_high_value(self) -> bool:
+        return self.decision == "allow_high_value"
+
+    @property
+    def is_low_value(self) -> bool:
+        return self.decision == "allow_low_value"
 
 
 @dataclass
@@ -137,18 +273,70 @@ def normalize_url(url: str) -> str:
 
     scheme = parsed.scheme.lower()
     netloc = parsed.netloc.lower()
+    if netloc in CANONICAL_HOST_MAP:
+        netloc = CANONICAL_HOST_MAP[netloc]
+
     path = parsed.path or "/"
+    while "//" in path:
+        path = path.replace("//", "/")
+    if path.endswith("/"):
+        last_segment = path.rstrip("/").rsplit("/", 1)[-1].lower()
+        if last_segment in INDEX_FILENAMES:
+            path = path[: -len(last_segment) - 1] or "/"
+    else:
+        filename = path.rsplit("/", 1)[-1].lower()
+        if filename in INDEX_FILENAMES:
+            path = path[: -len(filename)] or "/"
     if path != "/" and path.endswith("/"):
         path = path.rstrip("/")
+
+    query_pairs = []
+    for key, value in parse_qsl(parsed.query, keep_blank_values=True):
+        if key in NOISY_QUERY_PARAMS:
+            continue
+        query_pairs.append((key, value))
 
     return parsed._replace(
         scheme=scheme,
         netloc=netloc,
         path=path,
-        query="",
+        query=urlencode(query_pairs, doseq=True),
         fragment="",
         params="",
     ).geturl()
+
+
+def _host_has_blocked_marker(host: str) -> bool:
+    segments = host.split(".")
+    if any(segment in BLOCKED_HOST_SEGMENTS for segment in segments):
+        return True
+    return any(marker in host for marker in BLOCKED_HOST_FRAGMENT_MARKERS)
+
+
+def _contains_path_marker(path: str, markers: tuple[str, ...]) -> bool:
+    return any(marker in path for marker in markers)
+
+
+def _score_text(text: str, weights: dict[str, int]) -> int:
+    score = 0
+    for keyword, weight in weights.items():
+        if keyword in text:
+            score += weight
+    return score
+
+
+def _compute_priority_score(host: str, path_lower: str, suffix: str) -> int:
+    text = f"{host}{path_lower}"
+    score = _score_text(text, HIGH_VALUE_KEYWORDS)
+    score += _score_text(text, LOW_VALUE_KEYWORDS)
+
+    if suffix == ".pdf":
+        if any(keyword in text for keyword in PREFERRED_PDF_KEYWORDS):
+            score += 3
+        if any(keyword in text for keyword in DEPRIORITIZED_PDF_KEYWORDS):
+            score -= 3
+
+    return score
 
 
 def is_same_domain(url: str) -> bool:
@@ -178,6 +366,14 @@ def evaluate_rag_url(url: str) -> UrlDecision:
     if host in BLOCKED_DOMAINS:
         return UrlDecision(url, normalized, "block", "blockiert_backend_domain")
 
+    if _host_has_blocked_marker(host):
+        return UrlDecision(
+            url,
+            normalized,
+            "block",
+            "blockiert_preview_dev_backend_host",
+        )
+
     if not is_same_domain(normalized):
         return UrlDecision(url, normalized, "block", "blockiert_externe_domain")
 
@@ -203,7 +399,11 @@ def evaluate_rag_url(url: str) -> UrlDecision:
     if PROCESSED_ASSET_MARKER in path_lower:
         return UrlDecision(url, normalized, "block", "blockiert_processed_asset")
 
+    if _contains_path_marker(path_lower, BLOCKED_PATH_MARKERS):
+        return UrlDecision(url, normalized, "block", "blockiert_low_value_pfad")
+
     suffix = Path(path_lower).suffix
+    priority_score = _compute_priority_score(host, path_lower, suffix)
 
     if suffix in MEDIA_EXTENSIONS:
         return UrlDecision(url, normalized, "block", "blockiert_medien_datei")
@@ -212,7 +412,21 @@ def evaluate_rag_url(url: str) -> UrlDecision:
         return UrlDecision(url, normalized, "block", "blockiert_technisches_asset")
 
     if suffix == ".pdf":
-        return UrlDecision(url, normalized, "allow", "erlaubt_oeffentliches_pdf")
+        if priority_score >= 4:
+            return UrlDecision(
+                url,
+                normalized,
+                "allow_high_value",
+                "erlaubt_high_value_pdf",
+                priority_score=priority_score,
+            )
+        return UrlDecision(
+            url,
+            normalized,
+            "allow_low_value",
+            "erlaubt_low_value_pdf",
+            priority_score=priority_score,
+        )
 
     if suffix in OFFICE_EXTENSIONS:
         return UrlDecision(
@@ -223,9 +437,46 @@ def evaluate_rag_url(url: str) -> UrlDecision:
         )
 
     if suffix in HTML_LIKE_EXTENSIONS:
-        return UrlDecision(url, normalized, "allow", "erlaubt_oeffentliche_html_seite")
+        if _contains_path_marker(path_lower, LOW_VALUE_PATH_MARKERS):
+            return UrlDecision(
+                url,
+                normalized,
+                "allow_low_value",
+                "erlaubt_low_value_html_pfad",
+                priority_score=priority_score,
+            )
+        if priority_score >= 4:
+            return UrlDecision(
+                url,
+                normalized,
+                "allow_high_value",
+                "erlaubt_high_value_html_seite",
+                priority_score=priority_score,
+            )
+        return UrlDecision(
+            url,
+            normalized,
+            "allow_low_value",
+            "erlaubt_low_value_html_seite",
+            priority_score=priority_score,
+        )
 
-    return UrlDecision(url, normalized, "allow", "erlaubt_oeffentliche_datei")
+    if priority_score >= 4:
+        return UrlDecision(
+            url,
+            normalized,
+            "allow_high_value",
+            "erlaubt_high_value_datei",
+            priority_score=priority_score,
+        )
+
+    return UrlDecision(
+        url,
+        normalized,
+        "allow_low_value",
+        "erlaubt_low_value_datei",
+        priority_score=priority_score,
+    )
 
 
 def format_decision_summary(
@@ -243,7 +494,8 @@ def format_decision_summary(
         (
             "RAG-Filter: "
             f"{total} Entscheidungen "
-            f"(erlaubt={stats.decision_counts.get('allow', 0)}, "
+            f"(high={stats.decision_counts.get('allow_high_value', 0)}, "
+            f"low={stats.decision_counts.get('allow_low_value', 0)}, "
             f"blockiert={stats.decision_counts.get('block', 0)})"
         )
     ]

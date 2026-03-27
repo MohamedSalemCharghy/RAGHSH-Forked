@@ -94,6 +94,7 @@ from qdrant_client import QdrantClient
 
 # Eigene Module
 from hybrid_search import build_rag_context, create_reranker, perform_hybrid_search
+from rag_followup import maybe_expand_results_with_followup
 
 # ---------------------------------------------------------------------------
 # Konfiguration
@@ -256,6 +257,24 @@ def print_answer(answer: str, model: str) -> None:
     print(SEP)
 
 
+def print_followup_plan(plan: dict | None) -> None:
+    if not plan or plan.get("mode") != "need_more_context":
+        return
+    action = plan.get("requested_action", "")
+    reason = plan.get("reason", "")
+    target = plan.get("target_source_url", "")
+    query_hint = plan.get("query_hint", "")
+    print(f"\n[Follow-up Retrieval]\n{SEP}")
+    print(f"Aktion : {action}")
+    if reason:
+        print(f"Grund  : {reason}")
+    if target:
+        print(f"Quelle : {target}")
+    if query_hint:
+        print(f"Suche  : {query_hint}")
+    print(SEP)
+
+
 def print_llm_input(messages: list[dict]) -> None:
     """Gibt den vollständigen Prompt übersichtlich auf der Konsole aus."""
     if not DEBUG_PROMPT:
@@ -321,6 +340,19 @@ def chat_loop(
         if not results:
             print("\nKeine passenden Dokumente in der Wissensdatenbank gefunden.\n")
             continue
+
+        results, followup_plan = maybe_expand_results_with_followup(
+            gwdg_client,
+            model,
+            qdrant_client,
+            embedder,
+            sparse_embedder,
+            question,
+            results,
+            reranker=reranker,
+            top_k=RAG_TOP_K,
+        )
+        print_followup_plan(followup_plan)
 
         context  = build_rag_context(results)
         messages = build_rag_messages(question, context)

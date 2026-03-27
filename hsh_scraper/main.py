@@ -67,7 +67,7 @@ import asyncio
 import logging
 import os
 import tempfile
-from collections import deque
+from collections import Counter, deque
 from datetime import date, timedelta
 from pathlib import Path
 from urllib.parse import urlparse
@@ -76,6 +76,12 @@ import httpx
 import openpyxl
 import pymupdf4llm
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig
+from crawl_helpers import (
+    assess_markdown_quality,
+    build_crawler_config,
+    discover_sitemap_links,
+    format_host_summary,
+)
 from slugify import slugify
 from url_filter import (
     ALLOWED_DOMAIN,
@@ -96,7 +102,9 @@ MAX_PAGES = 10000
 MAX_AGE_DAYS = 7  # Re-crawl pages older than this many days
 
 OUTPUT_DIR = Path(__file__).parent / "data" / "ingested"
-RATE_LIMIT_SECONDS = 2
+RATE_LIMIT_SECONDS = 0.5
+CRAWL_LOW_VALUE_URLS = True
+USE_SITEMAP_SEEDS = True
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -206,8 +214,9 @@ async def process_html(
     today: str,
     config: CrawlerRunConfig,
     *,
+    url_decision=None,
     save: bool = True,
-) -> None:
+) -> tuple[object, bool, tuple[str, ...]]:
     """Crawl an HTML page and save its Markdown representation."""
     logger.info("Crawling: %s", url)
     result = await crawler.arun(url=url, config=config)
@@ -234,11 +243,28 @@ async def process_html(
     if not title:
         title = url
 
+    saved = False
+    quality_reasons: tuple[str, ...] = ()
     if save:
-        header = build_yaml_header(url, title, today, content_type="html")
-        filename = make_filename(url, today)
-        save_markdown(OUTPUT_DIR / filename, header, md_content)
-    return result
+        quality = assess_markdown_quality(
+            url,
+            title,
+            md_content,
+            is_high_value=bool(getattr(url_decision, "is_high_value", False)),
+        )
+        if quality.keep:
+            header = build_yaml_header(url, title, today, content_type="html")
+            filename = make_filename(url, today)
+            save_markdown(OUTPUT_DIR / filename, header, md_content)
+            saved = True
+        else:
+            quality_reasons = quality.reasons
+            logger.info(
+                "Skipping low-quality page: %s (%s)",
+                url,
+                ", ".join(quality.reasons),
+            )
+    return result, saved, quality_reasons
 
 
 # ---------------------------------------------------------------------------
@@ -300,71 +326,86 @@ async def main() -> None:
     success_count = 0
     fail_count = 0
     skip_count = 0
+    filtered_count = 0
     errors: list[dict] = []
     referrers: dict[str, str] = {}
-
-    config = CrawlerRunConfig(
-        # ── Content targeting (HsH TYPO3 structure) ───────────────
-        css_selector="main, .content-main, #content, .frame-default",
-
-        # ── Exclude boilerplate elements ──────────────────────────
-        excluded_tags=[
-            "nav", "header", "footer", "aside", "form",
-            "iframe", "script", "style", "noscript",
-        ],
-        excluded_selector=(
-            # Navigation
-            "nav.main-menu, .main-menu, .main-menu__mainmenu, "
-            "ul#tabmenu1, ul[role='menubar'], "
-            # Header & Quicklinks
-            "header, .quicklinks, "
-            # Breadcrumb
-            ".breadcrumb, .breadcrumbs, [aria-label='breadcrumb'], "
-            # Footer
-            "footer, .footer, .site-footer, "
-            # Cookiebot cookie-consent banner
-            "#CybotCookiebotDialog, #CybotCookiebotDialogBody, "
-            "[id*='Cookiebot'], [class*='cookiebot'], "
-            # Sidebar & misc
-            "aside, .sidebar, .widget, "
-            ".search-form, form[role='search'], "
-            ".social-media, .share-buttons"
-        ),
-
-        # ── Wait for main content to render ───────────────────────
-        # wait_for="css:main" entfernt: Seiten ohne <main>-Element
-        # (z.B. karriere.hs-hannover.de) liefen sonst in einen 60s-Timeout.
-        # Das Content-Targeting übernimmt css_selector zuverlässig allein.
-    )
+    config = build_crawler_config()
 
     # BFS state
     visited: set[str] = set()
-    queue: deque[str] = deque()
+    high_queue: deque[str] = deque()
+    low_queue: deque[str] = deque()
+    decision_by_url: dict[str, object] = {}
     filter_stats = DecisionStats()
+    queued_counts: Counter[str] = Counter()
+    crawled_counts: Counter[str] = Counter()
+    quality_reasons: Counter[str] = Counter()
+    crawled_hosts: Counter[str] = Counter()
+    sitemap_seed_count = 0
+    low_value_skipped = 0
 
     with UrlDecisionStore() as decision_store:
+        def enqueue_decision(decision, *, referrer: str, source: str) -> None:
+            nonlocal low_value_skipped
+            filter_stats.add(decision)
+            decision_store.record(decision, source=source)
+            if not decision.is_allowed:
+                return
+            if decision.normalized_url in visited:
+                return
+            if decision.is_low_value and not CRAWL_LOW_VALUE_URLS:
+                low_value_skipped += 1
+                return
+            visited.add(decision.normalized_url)
+            decision_by_url[decision.normalized_url] = decision
+            referrers[decision.normalized_url] = referrer
+            queued_counts[decision.decision] += 1
+            if decision.is_high_value:
+                high_queue.append(decision.normalized_url)
+            else:
+                low_queue.append(decision.normalized_url)
+
         for seed in SEED_URLS:
             decision = evaluate_rag_url(seed)
-            filter_stats.add(decision)
-            decision_store.record(decision, source="main")
             if not decision.is_allowed:
+                filter_stats.add(decision)
+                decision_store.record(decision, source="main_seed")
                 logger.warning(
                     "Seed-URL durch den RAG-Filter blockiert (%s): %s",
                     decision.reason,
                     decision.normalized_url,
                 )
                 continue
-            if decision.normalized_url not in visited:
-                visited.add(decision.normalized_url)
-                queue.append(decision.normalized_url)
-                referrers[decision.normalized_url] = "(seed)"
+            enqueue_decision(decision, referrer="(seed)", source="main_seed")
+
+        if USE_SITEMAP_SEEDS:
+            sitemap_links = await discover_sitemap_links(SEED_URLS)
+            for sitemap_link in sitemap_links:
+                decision = evaluate_rag_url(sitemap_link)
+                before = len(visited)
+                enqueue_decision(
+                    decision,
+                    referrer="(sitemap)",
+                    source="main_sitemap",
+                )
+                if len(visited) > before:
+                    sitemap_seed_count += 1
+            logger.info(
+                "Sitemap seeding discovered %d candidate URLs, %d queued.",
+                len(sitemap_links),
+                sitemap_seed_count,
+            )
 
         pages_processed = 0
 
         async with AsyncWebCrawler() as crawler:
-            while queue and pages_processed < MAX_PAGES:
-                url = queue.popleft()
+            while (high_queue or low_queue) and pages_processed < MAX_PAGES:
+                url = high_queue.popleft() if high_queue else low_queue.popleft()
+                url_decision = decision_by_url.get(url)
                 pages_processed += 1
+                if url_decision is not None:
+                    crawled_counts[url_decision.decision] += 1
+                crawled_hosts[urlparse(url).netloc.lower()] += 1
 
                 try:
                     fresh = is_fresh(url)
@@ -375,9 +416,19 @@ async def main() -> None:
                             await process_pdf(url, today)
                             success_count += 1
                     else:
-                        result = await process_html(crawler, url, today, config, save=not fresh)
-                        if not fresh:
+                        result, saved, skip_reasons = await process_html(
+                            crawler,
+                            url,
+                            today,
+                            config,
+                            url_decision=url_decision,
+                            save=not fresh,
+                        )
+                        if not fresh and saved:
                             success_count += 1
+                        elif not fresh and not saved:
+                            filtered_count += 1
+                            quality_reasons.update(skip_reasons)
                         # Neue Links werden vor dem Einreihen zentral bewertet.
                         links_data = getattr(result, "links", {}) or {}
                         for link_dict in links_data.get("internal", []):
@@ -385,14 +436,7 @@ async def main() -> None:
                             if not href or not href.startswith("http"):
                                 continue
                             decision = evaluate_rag_url(href)
-                            filter_stats.add(decision)
-                            decision_store.record(decision, source="main")
-                            if not decision.is_allowed:
-                                continue
-                            if decision.normalized_url not in visited:
-                                visited.add(decision.normalized_url)
-                                queue.append(decision.normalized_url)
-                                referrers[decision.normalized_url] = url
+                            enqueue_decision(decision, referrer=url, source="main")
                 except Exception as exc:
                     logger.error("Error processing %s: %s", url, exc)
                     fail_count += 1
@@ -403,19 +447,39 @@ async def main() -> None:
                     })
 
                 # Rate-limit between requests (skip after the last one)
-                if queue and pages_processed < MAX_PAGES:
+                if (high_queue or low_queue) and pages_processed < MAX_PAGES:
                     await asyncio.sleep(RATE_LIMIT_SECONDS)
 
     write_error_report(errors, today)
 
     for line in format_decision_summary(filter_stats):
         logger.info(line)
+    if quality_reasons:
+        logger.info("Post-crawl quality rejects: %d", sum(quality_reasons.values()))
+        for reason, count in quality_reasons.most_common(8):
+            logger.info("  %s: %d", reason, count)
+    logger.info(
+        "Queue mix: high=%d, low=%d, low_skipped_by_policy=%d, sitemap_seeded=%d",
+        queued_counts.get("allow_high_value", 0),
+        queued_counts.get("allow_low_value", 0),
+        low_value_skipped,
+        sitemap_seed_count,
+    )
+    logger.info(
+        "Crawl mix: high=%d, low=%d, filtered_after_crawl=%d",
+        crawled_counts.get("allow_high_value", 0),
+        crawled_counts.get("allow_low_value", 0),
+        filtered_count,
+    )
+    for line in format_host_summary(crawled_hosts):
+        logger.info(line)
 
     logger.info(
-        "Done. %d succeeded, %d failed, %d skipped (fresh cache) out of %d URLs visited.",
+        "Done. %d saved, %d failed, %d skipped (fresh cache), %d filtered after crawl out of %d URLs visited.",
         success_count,
         fail_count,
         skip_count,
+        filtered_count,
         pages_processed,
     )
 

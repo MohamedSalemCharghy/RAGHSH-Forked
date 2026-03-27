@@ -32,7 +32,7 @@ import os
 import re
 import sys
 import tempfile
-from collections import deque
+from collections import Counter, deque
 from datetime import date, timedelta
 from pathlib import Path
 from urllib.parse import urlparse
@@ -41,6 +41,12 @@ import httpx
 import openpyxl
 import pymupdf4llm
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig
+from crawl_helpers import (
+    assess_markdown_quality,
+    build_crawler_config,
+    discover_sitemap_links,
+    format_host_summary,
+)
 from slugify import slugify
 from url_filter import (
     ALLOWED_DOMAIN,
@@ -61,7 +67,9 @@ MAX_PAGES      = 40000
 MAX_AGE_DAYS   = 7
 
 OUTPUT_DIR         = Path(__file__).parent / "data" / "ingested"
-RATE_LIMIT_SECONDS = 2
+RATE_LIMIT_SECONDS = 0.5
+CRAWL_LOW_VALUE_URLS = True
+USE_SITEMAP_SEEDS = True
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -292,6 +300,7 @@ async def process_html(
     today: str,
     config: CrawlerRunConfig,
     *,
+    url_decision=None,
     save: bool = True,
 ):
     logger.info("Crawling: %s", url)
@@ -317,11 +326,28 @@ async def process_html(
     if not title:
         title = url
 
+    saved = False
+    quality_reasons: tuple[str, ...] = ()
     if save:
-        header = build_yaml_header(url, title, today, content_type="html")
-        save_markdown(OUTPUT_DIR / make_filename(url, today), header, md_content)
+        quality = assess_markdown_quality(
+            url,
+            title,
+            md_content,
+            is_high_value=bool(getattr(url_decision, "is_high_value", False)),
+        )
+        if quality.keep:
+            header = build_yaml_header(url, title, today, content_type="html")
+            save_markdown(OUTPUT_DIR / make_filename(url, today), header, md_content)
+            saved = True
+        else:
+            quality_reasons = quality.reasons
+            logger.info(
+                "Verwerfe Seite mit geringem Inhaltswert: %s (%s)",
+                url,
+                ", ".join(quality.reasons),
+            )
 
-    return result
+    return result, saved, quality_reasons
 
 
 def write_error_report(errors: list[dict], today: str) -> None:
@@ -353,24 +379,7 @@ async def run_crawl(to_crawl: set[str], decision_store: UrlDecisionStore) -> Non
     today   = date.today().isoformat()
     errors: list[dict] = []
     filter_stats = DecisionStats()
-
-    config = CrawlerRunConfig(
-        css_selector="main, .content-main, #content, .frame-default",
-        excluded_tags=["nav", "header", "footer", "aside", "form",
-                       "iframe", "script", "style", "noscript"],
-        excluded_selector=(
-            "nav.main-menu, .main-menu, .main-menu__mainmenu, "
-            "ul#tabmenu1, ul[role='menubar'], "
-            "header, .quicklinks, "
-            ".breadcrumb, .breadcrumbs, [aria-label='breadcrumb'], "
-            "footer, .footer, .site-footer, "
-            "#CybotCookiebotDialog, #CybotCookiebotDialogBody, "
-            "[id*='Cookiebot'], [class*='cookiebot'], "
-            "aside, .sidebar, .widget, "
-            ".search-form, form[role='search'], "
-            ".social-media, .share-buttons"
-        ),
-    )
+    config = build_crawler_config()
 
     # Bekannte, aktuell gescrapte URLs ermitteln (Duplikat-Schutz während des Laufs)
     cutoff = date.today() - timedelta(days=MAX_AGE_DAYS)
@@ -392,15 +401,59 @@ async def run_crawl(to_crawl: set[str], decision_store: UrlDecisionStore) -> Non
             continue
 
     # Queue mit den zu crawlenden URLs befüllen
-    queue: deque[str] = deque()
+    high_queue: deque[str] = deque()
+    low_queue: deque[str] = deque()
     referrers: dict[str, str] = {}
-    for url in to_crawl:
-        norm = normalize_url(url)
-        if norm not in visited:
-            queue.append(norm)
-            referrers[norm] = "(resume)"
+    decision_by_url: dict[str, object] = {}
+    queued_counts: Counter[str] = Counter()
+    crawled_counts: Counter[str] = Counter()
+    quality_reasons: Counter[str] = Counter()
+    crawled_hosts: Counter[str] = Counter()
+    filtered = 0
+    sitemap_seed_count = 0
+    low_value_skipped = 0
 
-    total     = len(queue)
+    def enqueue_decision(decision, *, referrer: str, source: str) -> None:
+        nonlocal low_value_skipped
+        filter_stats.add(decision)
+        decision_store.record(decision, source=source)
+        if not decision.is_allowed:
+            return
+        if decision.normalized_url in visited:
+            return
+        if decision.is_low_value and not CRAWL_LOW_VALUE_URLS:
+            low_value_skipped += 1
+            return
+        visited.add(decision.normalized_url)
+        decision_by_url[decision.normalized_url] = decision
+        referrers[decision.normalized_url] = referrer
+        queued_counts[decision.decision] += 1
+        if decision.is_high_value:
+            high_queue.append(decision.normalized_url)
+        else:
+            low_queue.append(decision.normalized_url)
+
+    for url in to_crawl:
+        enqueue_decision(evaluate_rag_url(url), referrer="(resume)", source="resume_seed")
+
+    if USE_SITEMAP_SEEDS:
+        sitemap_links = await discover_sitemap_links(SEED_URLS)
+        for sitemap_link in sitemap_links:
+            before = len(visited)
+            enqueue_decision(
+                evaluate_rag_url(sitemap_link),
+                referrer="(sitemap)",
+                source="resume_sitemap",
+            )
+            if len(visited) > before:
+                sitemap_seed_count += 1
+        logger.info(
+            "Sitemap-Seeding: %d Kandidaten gefunden, %d zusätzlich eingereiht.",
+            len(sitemap_links),
+            sitemap_seed_count,
+        )
+
+    total     = len(high_queue) + len(low_queue)
     done      = 0
     success   = 0
     fail      = 0
@@ -408,9 +461,13 @@ async def run_crawl(to_crawl: set[str], decision_store: UrlDecisionStore) -> Non
     logger.info("Starte Resume-Crawl: %d URLs in der Warteschlange", total)
 
     async with AsyncWebCrawler() as crawler:
-        while queue and done < MAX_PAGES:
-            url  = queue.popleft()
+        while (high_queue or low_queue) and done < MAX_PAGES:
+            url  = high_queue.popleft() if high_queue else low_queue.popleft()
+            url_decision = decision_by_url.get(url)
             done += 1
+            if url_decision is not None:
+                crawled_counts[url_decision.decision] += 1
+            crawled_hosts[urlparse(url).netloc.lower()] += 1
 
             pct = 100.0 * done / max(total, 1)
             logger.info("[%d/%d  %5.1f%%] %s", done, total, pct, url)
@@ -418,8 +475,21 @@ async def run_crawl(to_crawl: set[str], decision_store: UrlDecisionStore) -> Non
             try:
                 if await is_pdf_url(url):
                     await process_pdf(url, today)
+                    success += 1
                 else:
-                    result = await process_html(crawler, url, today, config, save=True)
+                    result, saved, skip_reasons = await process_html(
+                        crawler,
+                        url,
+                        today,
+                        config,
+                        url_decision=url_decision,
+                        save=True,
+                    )
+                    if saved:
+                        success += 1
+                    else:
+                        filtered += 1
+                        quality_reasons.update(skip_reasons)
                     # Neu entdeckte interne Links in die Queue aufnehmen
                     links_data = getattr(result, "links", {}) or {}
                     for link_dict in links_data.get("internal", []):
@@ -427,18 +497,12 @@ async def run_crawl(to_crawl: set[str], decision_store: UrlDecisionStore) -> Non
                         if not href or not href.startswith("http"):
                             continue
                         decision = evaluate_rag_url(href)
-                        filter_stats.add(decision)
-                        decision_store.record(decision, source="resume")
-                        if not decision.is_allowed:
-                            continue
-                        if decision.normalized_url not in visited:
-                            visited.add(decision.normalized_url)
-                            queue.append(decision.normalized_url)
-                            referrers[decision.normalized_url] = url
+                        before = len(visited)
+                        enqueue_decision(decision, referrer=url, source="resume")
+                        if len(visited) > before:
                             total += 1
 
                 visited.add(normalize_url(url))
-                success += 1
 
             except Exception as exc:
                 logger.error("Fehler bei %s: %s", url, exc)
@@ -449,15 +513,37 @@ async def run_crawl(to_crawl: set[str], decision_store: UrlDecisionStore) -> Non
                     "error":    str(exc),
                 })
 
-            if queue and done < MAX_PAGES:
+            if (high_queue or low_queue) and done < MAX_PAGES:
                 await asyncio.sleep(RATE_LIMIT_SECONDS)
 
     write_error_report(errors, today)
     for line in format_decision_summary(filter_stats):
         logger.info(line)
+    if quality_reasons:
+        logger.info("Nach dem Crawl verworfene Seiten: %d", sum(quality_reasons.values()))
+        for reason, count in quality_reasons.most_common(8):
+            logger.info("  %s: %d", reason, count)
     logger.info(
-        "Fertig. %d erfolgreich, %d fehlgeschlagen von %d verarbeiteten URLs.",
-        success, fail, done,
+        "Queue-Mix: high=%d, low=%d, low_skipped_by_policy=%d, sitemap_seeded=%d",
+        queued_counts.get("allow_high_value", 0),
+        queued_counts.get("allow_low_value", 0),
+        low_value_skipped,
+        sitemap_seed_count,
+    )
+    logger.info(
+        "Crawl-Mix: high=%d, low=%d, filtered_after_crawl=%d",
+        crawled_counts.get("allow_high_value", 0),
+        crawled_counts.get("allow_low_value", 0),
+        filtered,
+    )
+    for line in format_host_summary(crawled_hosts):
+        logger.info(line)
+    logger.info(
+        "Fertig. %d erfolgreich gespeichert, %d fehlgeschlagen, %d nach dem Crawl verworfen, %d URLs verarbeitet.",
+        success,
+        fail,
+        filtered,
+        done,
     )
 
 
