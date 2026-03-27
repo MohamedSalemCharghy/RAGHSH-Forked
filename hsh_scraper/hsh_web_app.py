@@ -23,6 +23,7 @@ from hybrid_search import (
     DENSE_MODEL,
     SPARSE_MODEL,
     build_rag_context,
+    create_reranker,
     embed_query_dense,
     embed_query_sparse,
     perform_hybrid_search,
@@ -94,12 +95,8 @@ def get_sparse_embedder() -> SparseTextEmbedding:
 
 @st.cache_resource(show_spinner="Lade Reranker-Modell …")
 def get_reranker():
-    from hybrid_search import RERANKER_MODEL, USE_RERANKER
-    if not USE_RERANKER:
-        return None
     try:
-        from fastembed import TextCrossEncoder
-        return TextCrossEncoder(model_name=RERANKER_MODEL)
+        return create_reranker()
     except Exception:
         return None
 

@@ -93,7 +93,7 @@ from openai import OpenAI, APIConnectionError, AuthenticationError
 from qdrant_client import QdrantClient
 
 # Eigene Module
-from hybrid_search import build_rag_context, perform_hybrid_search
+from hybrid_search import build_rag_context, create_reranker, perform_hybrid_search
 
 # ---------------------------------------------------------------------------
 # Konfiguration
@@ -294,6 +294,7 @@ def chat_loop(
     qdrant_client: QdrantClient,
     embedder: TextEmbedding,
     sparse_embedder: SparseTextEmbedding,
+    reranker=None,
 ) -> None:
     """Interaktive RAG-Chat-Schleife."""
     print(f"HsH-Chatbot bereit.  Strg+C oder 'exit' zum Beenden.\n")
@@ -314,7 +315,7 @@ def chat_loop(
 
         # ── RAG: Suche + Kontext ──────────────────────────────────────────
         results = perform_hybrid_search(
-            qdrant_client, embedder, sparse_embedder, question, top_k=RAG_TOP_K
+            qdrant_client, embedder, sparse_embedder, question, top_k=RAG_TOP_K, reranker=reranker
         )
 
         if not results:
@@ -370,10 +371,18 @@ def main() -> None:
 
     print(f"Lade Sparse-Modell '{SPARSE_MODEL}'…")
     sparse_embedder = SparseTextEmbedding(model_name=SPARSE_MODEL)
+
+    reranker = None
+    try:
+        print("Lade Reranker…")
+        reranker = create_reranker()
+    except Exception as exc:
+        print(f"Reranker nicht verfügbar — weiter ohne Reranking: {exc}")
+
     print("Modelle geladen.\n")
 
     # ── Chat starten ──────────────────────────────────────────────────────
-    chat_loop(gwdg_client, model, qdrant_client, embedder, sparse_embedder)
+    chat_loop(gwdg_client, model, qdrant_client, embedder, sparse_embedder, reranker=reranker)
 
 
 if __name__ == "__main__":

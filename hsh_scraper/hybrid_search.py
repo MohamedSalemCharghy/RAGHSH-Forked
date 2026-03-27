@@ -147,6 +147,20 @@ def _fetch_neighbor_chunk(
     return hits[0].payload if hits else None
 
 
+def create_reranker():
+    """Erzeugt den Cross-Encoder-Reranker mit Import-Fallback."""
+    if not USE_RERANKER:
+        return None
+    try:
+        try:
+            from fastembed import TextCrossEncoder
+        except ImportError:
+            from fastembed.rerank.cross_encoder import TextCrossEncoder
+        return TextCrossEncoder(model_name=RERANKER_MODEL)
+    except Exception:
+        raise
+
+
 def perform_hybrid_search(
     client: QdrantClient,
     dense_embedder: TextEmbedding,
@@ -341,12 +355,8 @@ def main() -> None:
     reranker = None
     if USE_RERANKER:
         try:
-            try:
-                from fastembed import TextCrossEncoder
-            except ImportError:
-                from fastembed.rerank.cross_encoder import TextCrossEncoder
             print(f"Lade Reranker '{RERANKER_MODEL}'…")
-            reranker = TextCrossEncoder(model_name=RERANKER_MODEL)
+            reranker = create_reranker()
         except Exception as exc:
             print(f"Reranker nicht verfügbar — weiter ohne Reranking: {exc}")
 
